@@ -72,7 +72,7 @@ Core Toolkit Game Systems
 *
 * @code
 * // 1. Declare it, the way the hl2sdk expects.
-* class MyGameSystem : public CBaseGameSystem
+* class MyGameSystem : public CAutoGameSystem
 * {
 * public:
 *     DECLARE_GAME_SYSTEM();
