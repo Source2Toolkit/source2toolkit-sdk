@@ -336,7 +336,7 @@ class ToolkitSdkConfig(object):
       proto_dir = vendored if os.path.isdir(vendored) else None
     if not proto_dir:
       raise Exception("CSGO_PROTO is not set -- point it at the csgo/ folder of a "
-                      "SteamDatabase/Protobufs checkout, or run python tools/deps.py init")
+                      "SteamTracking/Protobufs checkout, or run python tools/deps.py init")
 
     names = [
       'network_connection', 'networkbasetypes', 'cs_gameevents', 'cs_usercmd',

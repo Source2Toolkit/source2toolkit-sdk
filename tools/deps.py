@@ -8,7 +8,7 @@ The SDK compiles against:
   * s2sdk               -- AlliedModders' s2sdk (cs2 branch, formerly hl2sdk's
                            cs2 branch); vendor/s2sdk, a submodule, unless you
                            point at your own checkout
-  * Protobufs (csgo/)   -- SteamDatabase's protobuf definitions
+  * Protobufs (csgo/)   -- SteamTracking's protobuf definitions
   * KHook               -- vendor/khook, a submodule, which has to be the very
                            commit metamod-source was built with or the toolkit
                            core refuses every plugin at load time
@@ -62,7 +62,7 @@ DEFAULTS = {
     },
     'protobufs': {
         'env': ['CSGO_PROTO'],
-        'repo': 'https://github.com/SteamDatabase/Protobufs.git',
+        'repo': 'https://github.com/SteamTracking/Protobufs.git',
         'branch': 'master',
         'dir': 'Protobufs',
         # The env var / config path points at the csgo/ folder inside the clone.

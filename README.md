@@ -60,7 +60,7 @@ S2SDK_CS2, S2SDKCS2, S2SDK, HL2SDK_CS2, HL2SDKCS2
 ```
 
 The **Protobufs** (the `csgo/` folder of
-[SteamDatabase/Protobufs](https://github.com/SteamDatabase/Protobufs)) come
+[SteamTracking/Protobufs](https://github.com/SteamTracking/Protobufs)) come
 from `CSGO_PROTO`, or from `tools/deps.py`:
 
 ```bash

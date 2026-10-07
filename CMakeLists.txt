@@ -87,7 +87,7 @@ endif()
 if (NOT EXISTS "${PROTOBUFS}/netmessages.proto")
     message(FATAL_ERROR
             "Protobufs (csgo/) not found at ${PROTOBUFS}. Set CSGO_PROTO to the csgo/ folder "
-            "of a SteamDatabase/Protobufs checkout, or run `python tools/deps.py init`.")
+            "of a SteamTracking/Protobufs checkout, or run `python tools/deps.py init`.")
 endif()
 
 # =========================
