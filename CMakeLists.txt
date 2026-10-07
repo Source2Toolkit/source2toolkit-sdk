@@ -254,6 +254,22 @@ target_link_options(source2toolkit-config INTERFACE
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
 # =========================
+# S2SDK
+# =========================
+#
+# An s2sdk with its own CMakeLists.txt gives its include paths, defines and
+# libraries as s2sdk::s2sdk; for one without it they are listed below.
+
+set(S2SDK_HAS_CMAKE OFF)
+if (EXISTS "${SOURCESDK}/CMakeLists.txt")
+    set(S2SDK_HAS_CMAKE ON)
+    if (NOT TARGET s2sdk)
+        add_subdirectory(${SOURCESDK} ${CMAKE_CURRENT_BINARY_DIR}/s2sdk)
+    endif()
+endif()
+message(STATUS "s2sdk CMake targets: ${S2SDK_HAS_CMAKE}")
+
+# =========================
 # SDK LIB
 # =========================
 
@@ -288,23 +304,29 @@ target_link_libraries(source2toolkit-sdk PUBLIC
         source2toolkit-config
 )
 
+# What the toolkit headers reach into beyond s2sdk's own include paths.
 target_include_directories(source2toolkit-sdk PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/public
         ${SOURCESDK}
-        ${SOURCESDK}/thirdparty/protobuf-3.21.8/src
-        ${SOURCESDK}/common
-        ${SOURCESDK}/game/shared
-        ${SOURCESDK}/game/server
-        ${SOURCESDK}/public
-        ${SOURCESDK}/public/engine
-        ${SOURCESDK}/public/mathlib
-        ${SOURCESDK}/public/tier0
-        ${SOURCESDK}/public/tier1
-        ${SOURCESDK}/public/entity2
-        ${SOURCESDK}/public/game/server
         ${SOURCESDK}/public/schemasystem
         ${KHOOK_DIR}/include
 )
+
+if (NOT S2SDK_HAS_CMAKE)
+    target_include_directories(source2toolkit-sdk PUBLIC
+            ${SOURCESDK}/thirdparty/protobuf-3.21.8/src
+            ${SOURCESDK}/common
+            ${SOURCESDK}/game/shared
+            ${SOURCESDK}/game/server
+            ${SOURCESDK}/public
+            ${SOURCESDK}/public/engine
+            ${SOURCESDK}/public/mathlib
+            ${SOURCESDK}/public/tier0
+            ${SOURCESDK}/public/tier1
+            ${SOURCESDK}/public/entity2
+            ${SOURCESDK}/public/game/server
+    )
+endif()
 
 # Which KHook this binary -- and everything linking it -- was compiled
 # against. Read back by TOOLKIT_SAVEVARS() and by the core's ToolkitFactory.
@@ -316,7 +338,13 @@ target_compile_definitions(source2toolkit-sdk PUBLIC
 # LINK SDK DEPENDENCIES
 # =========================
 
-if (LINUX)
+if (S2SDK_HAS_CMAKE)
+    target_link_libraries(source2toolkit-sdk PUBLIC
+            s2sdk::s2sdk
+            s2sdk::steam_api
+            Protobufs
+    )
+elseif (LINUX)
     target_link_libraries(source2toolkit-sdk PUBLIC
             ${SOURCESDK_LIB}/linux64/libtier0.so
             ${SOURCESDK_LIB}/linux64/interfaces.a
@@ -325,9 +353,7 @@ if (LINUX)
             ${SOURCESDK_LIB}/linux64/libsteam_api.so
             Protobufs
     )
-endif()
-
-if (WIN32)
+elseif (WIN32)
     target_link_libraries(source2toolkit-sdk PUBLIC
             ${SOURCESDK_LIB}/public/win64/tier0.lib
             ${SOURCESDK_LIB}/public/win64/interfaces.lib
