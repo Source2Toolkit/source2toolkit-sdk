@@ -316,7 +316,7 @@ Name-addressed helpers
 
 The interface above is index-addressed, which is the right shape when a plugin
 holds on to a ConVar. These are for the one-off case -- flip a cvar by name and
-move on -- and do the lookup themselves. They go through hl2sdk's ConVarRef
+move on -- and do the lookup themselves. They go through s2sdk's ConVarRef
 directly rather than the interface, so they work before the toolkit's ConVar
 manager is up.
 ========================= */

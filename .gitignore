@@ -557,6 +557,7 @@ docfx/api/
 docfx/_exported_templates/
 
 # tools/deps.py: the saved dependency choice and the clones it makes
+# (vendor/hl2sdk-cs2/ is where it cloned hl2sdk before s2sdk became a submodule)
 deps.json
 deps.cmake
 vendor/hl2sdk-cs2/

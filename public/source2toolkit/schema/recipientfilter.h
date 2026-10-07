@@ -34,13 +34,25 @@
  * Project: Source2Toolkit
  */
 #pragma once
+#include <cstdint>
 #include "irecipientfilter.h"
+#include "playerslot.h"
 
+// The game's own CRecipientFilter, member for member (libserver.so: ctor,
+// CopyFrom, Reset and the four IRecipientFilter getters read these offsets).
+// s2sdk's game/server/recipientfilter.h is still the Source 1 class and does
+// not compile, so the toolkit carries its own. Only what works from the
+// filter's own state is here; the game's helpers that walk the player list
+// (AddAllPlayers, AddRecipientsByTeam/PVS/PAS, UsePredictionRules) are not.
+//
+// Unlike the game, the default buffer is BUF_RELIABLE (the game's is
+// BUF_DEFAULT): every caller so far relies on it.
 class CRecipientFilter : public IRecipientFilter
 {
 public:
     CRecipientFilter(NetChannelBufType_t nBufType = BUF_RELIABLE, bool bInitMessage = false)
-        : m_nBufType(nBufType), m_bInitMessage(bInitMessage)
+        : m_nPredictedPlayerSlot(-1), m_nBufType(nBufType), m_bInitMessage(bInitMessage),
+          m_bUsingPredictionRules(false), m_bIgnorePredictionCull(false)
     {
         m_Recipients.ClearAll();
     }
@@ -52,12 +64,69 @@ public:
     NetChannelBufType_t GetNetworkBufType(void) const override { return m_nBufType; }
     bool IsInitMessage(void) const override { return m_bInitMessage; }
     const CPlayerBitVec& GetRecipients(void) const override { return m_Recipients; }
-    CPlayerSlot GetPredictedPlayerSlot(void) const override { return -1; }
+    CPlayerSlot GetPredictedPlayerSlot(void) const override { return m_nPredictedPlayerSlot; }
+
+    // Like the game: the recipients and the flags, not the predicted slot.
+    void CopyFrom(const CRecipientFilter& src)
+    {
+        m_Recipients = src.m_Recipients;
+        m_nBufType = src.GetNetworkBufType();
+        m_bInitMessage = src.IsInitMessage();
+        m_bUsingPredictionRules = src.m_bUsingPredictionRules;
+        m_bIgnorePredictionCull = src.m_bIgnorePredictionCull;
+    }
+
+    void Reset()
+    {
+        m_Recipients.ClearAll();
+        m_nBufType = BUF_DEFAULT;
+        m_bInitMessage = false;
+        m_bUsingPredictionRules = false;
+        m_bIgnorePredictionCull = false;
+    }
+
+    void MakeInitMessage() { m_bInitMessage = true; }
+    void MakeReliable() { m_nBufType = BUF_RELIABLE; }
 
     void AddRecipient(CPlayerSlot slot)
     {
-        if (slot.Get() >= 0 && slot.Get() < ABSOLUTE_PLAYER_LIMIT)
+        if (slot.IsValid())
             m_Recipients.Set(slot.Get());
+    }
+
+    void RemoveRecipient(CPlayerSlot slot)
+    {
+        if (slot.IsValid())
+            m_Recipients.Clear(slot.Get());
+    }
+
+    void RemoveAllRecipients() { m_Recipients.ClearAll(); }
+
+    bool HasRecipient(CPlayerSlot slot) const
+    {
+        return slot.IsValid() && m_Recipients.IsBitSet(slot.Get());
+    }
+
+    int GetRecipientCount() const
+    {
+        int count = 0;
+        for (int i = m_Recipients.FindNextSetBit(0); i != -1; i = m_Recipients.FindNextSetBit(i + 1))
+            count++;
+        return count;
+    }
+
+    // CBitVec's Or/And/Not do not compile under clang (unqualified
+    // ValidateOperand in a dependent base), so bit by bit.
+    void AddPlayersFromBitMask(const CPlayerBitVec& playerbits)
+    {
+        for (int i = playerbits.FindNextSetBit(0); i != -1; i = playerbits.FindNextSetBit(i + 1))
+            m_Recipients.Set(i);
+    }
+
+    void RemovePlayersFromBitMask(const CPlayerBitVec& playerbits)
+    {
+        for (int i = playerbits.FindNextSetBit(0); i != -1; i = playerbits.FindNextSetBit(i + 1))
+            m_Recipients.Clear(i);
     }
 
     void SetFromBitmask(uint64_t mask)
@@ -66,13 +135,31 @@ public:
         *reinterpret_cast<uint64_t*>(m_Recipients.Base()) = mask;
     }
 
-    void MakeReliable() { m_nBufType = BUF_RELIABLE; }
+    // The player whose client already predicted the event: dropped from the
+    // recipients and reported through GetPredictedPlayerSlot(), as the game does.
+    void SetPredictedPlayer(CPlayerSlot slot)
+    {
+        if (!HasRecipient(slot))
+            return;
+        RemoveRecipient(slot);
+        m_nPredictedPlayerSlot = slot;
+    }
+
+    bool IsUsingPredictionRules() const { return m_bUsingPredictionRules; }
+
+    bool IgnorePredictionCull() const { return m_bIgnorePredictionCull; }
+    void SetIgnorePredictionCull(bool ignore) { m_bIgnorePredictionCull = ignore; }
 
 protected:
-    NetChannelBufType_t m_nBufType;
-    bool m_bInitMessage;
-    CPlayerBitVec m_Recipients;
+    CPlayerBitVec m_Recipients;         // +8
+    CPlayerSlot m_nPredictedPlayerSlot; // +16
+    NetChannelBufType_t m_nBufType;     // +20, int8
+    bool m_bInitMessage;                // +21
+    bool m_bUsingPredictionRules;       // +22
+    bool m_bIgnorePredictionCull;       // +23
 };
+
+static_assert(sizeof(CRecipientFilter) == 24, "CRecipientFilter has to match the game's layout");
 
 class CSingleRecipientFilter : public CRecipientFilter
 {

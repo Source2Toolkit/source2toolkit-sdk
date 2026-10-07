@@ -4,3 +4,8 @@
 [submodule "vendor/khook"]
 	path = vendor/khook
 	url = https://github.com/Kenzzer/KHook.git
+[submodule "vendor/s2sdk"]
+	path = vendor/s2sdk
+	url = https://github.com/alliedmodders/s2sdk.git
+	branch = cs2
+	shallow = true

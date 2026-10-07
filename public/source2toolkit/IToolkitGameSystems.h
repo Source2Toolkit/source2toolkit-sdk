@@ -48,7 +48,7 @@
 * The toolkit finds that head once, by signature, and hands it over here. It has
 * to be handed over rather than used directly, because
 * CBaseGameSystemFactory::sm_pFirst is a static member: every binary that
-* includes the hl2sdk header gets its own copy, so a plugin's copy is null until
+* includes the s2sdk header gets its own copy, so a plugin's copy is null until
 * it is pointed at the engine's.
   */
 
@@ -71,7 +71,7 @@ Core Toolkit Game Systems
 * Registering a game system of your own is three steps:
 *
 * @code
-* // 1. Declare it, the way the hl2sdk expects.
+* // 1. Declare it, the way s2sdk expects.
 * class MyGameSystem : public CAutoGameSystem
 * {
 * public:

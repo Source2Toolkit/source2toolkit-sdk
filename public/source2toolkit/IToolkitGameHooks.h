@@ -82,7 +82,7 @@
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
-// variant_t is a typedef of a template in hl2sdk, so it cannot be forward
+// variant_t is a typedef of a template in s2sdk, so it cannot be forward
 // declared like the rest.
 #include "variant.h"
 

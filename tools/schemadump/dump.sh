@@ -12,13 +12,14 @@
 # runner dumps in its Load() and exits the process before the server would
 # crash on the missing content. About 1 GB is downloaded.
 #
-# Needs HL2SDKCS2 and MMSOURCE_DEV (to build the runner), cmake, a C++20
-# compiler, curl, python3 with the `vpk` module. DEPOTDOWNLOADER may point
-# to a DepotDownloader binary; otherwise the latest Linux release is fetched.
+# Needs MMSOURCE_DEV and s2sdk (to build the runner -- an S2SDK / HL2SDKCS2
+# variable or the vendor/s2sdk submodule), cmake, a C++20 compiler, curl,
+# python3 with the `vpk` module. DEPOTDOWNLOADER may point to a
+# DepotDownloader binary; otherwise the latest Linux release is fetched.
 set -euo pipefail
 
 [ $# -eq 2 ] || { echo "usage: $0 <work dir> <output json>" >&2; exit 1; }
-: "${HL2SDKCS2:?HL2SDKCS2 is not set}" "${MMSOURCE_DEV:?MMSOURCE_DEV is not set}"
+: "${MMSOURCE_DEV:?MMSOURCE_DEV is not set}"
 
 WORK=$(realpath -m "$1")
 OUT=$(realpath -m "$2")

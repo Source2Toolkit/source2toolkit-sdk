@@ -71,7 +71,7 @@
 Signon groups
 ========================= */
 
-// hl2sdk-cs2 does not declare these; the values are the engine's own and are
+// s2sdk does not declare these; the values are the engine's own and are
 // what every message below is tagged with. Index 12 is a gap in the engine.
 enum SignonGroup_t : int32_t
 {
@@ -110,7 +110,7 @@ inline constexpr const char* k_pszNetGroupNames[ SG_TOTAL ] =
 Typed message wrappers
 ========================= */
 
-// hl2sdk-cs2's CNetMessagePB is a one-parameter stub, and a class template
+// s2sdk's CNetMessagePB is a one-parameter stub, and a class template
 // cannot be redeclared with a different parameter list, so the message id,
 // signon group and buffer type ride along here instead.
 //
@@ -204,8 +204,8 @@ class CSVCMsg_CmdKeyValues_t :               public CNetMessagePBTyped< svc_CmdK
 class CSVCMsg_BSPDecal_t :                   public CNetMessagePBTyped< svc_BSPDecal, CSVCMsg_BSPDecal > {};
 class CSVCMsg_SplitScreen_t :                public CNetMessagePBTyped< svc_SplitScreen, CSVCMsg_SplitScreen, SG_SIGNON > {};
 // The one wrapper that cannot stay abstract: CServerSideClientBase embeds it by
-// value, and CNetMessage leaves AsProto/AsProto2/GetNetMessage/CopyConstruct
-// pure. Filling the four slots adds no members and no virtuals of its own, so
+// value, and CNetMessage leaves AsProto/AsProto2/GetNetMessage/CopyConstruct/
+// GetMessageId/GetName pure. Filling the slots adds no members and no virtuals of its own, so
 // the layout is unchanged; the bodies are never reached, since this is only
 // ever cast onto engine memory.
 class CSVCMsg_PacketEntities_t : public CNetMessagePBTyped< svc_PacketEntities, CSVCMsg_PacketEntities, SG_INVALID >
@@ -214,7 +214,9 @@ public:
     void* AsProto() const override { return nullptr; }
     void* AsProto2() const override { return nullptr; }
     INetworkMessageInternal* GetNetMessage() const override { return nullptr; }
-    CNetMessage* CopyConstruct( const CNetMessage* other ) const override { return nullptr; }
+    CNetMessage* CopyConstruct() const override { return nullptr; }
+    NetworkMessageId GetMessageId() const override { return svc_PacketEntities; }
+    const char* GetName() const override { return "CSVCMsg_PacketEntities"; }
 };
 class CSVCMsg_Prefetch_t :                   public CNetMessagePBTyped< svc_Prefetch, CSVCMsg_Prefetch, SG_SOUNDS > {};
 class CSVCMsg_Menu_t :                       public CNetMessagePBTyped< svc_Menu, CSVCMsg_Menu > {};

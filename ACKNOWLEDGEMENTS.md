@@ -36,11 +36,12 @@ JSON library used on the native side.
 
 ## AlliedModders
 
-Metamod:Source, which loads the toolkit, and HL2SDK, which it compiles
-against, are AlliedModders LLC's work -- Metamod:Source by David "BAILOPAN"
-Anderson and Scott "DS" Ehlert. The toolkit's plugin manager, interface sharing
-and GameDLL communication follow Metamod:Source's model, and HL2SDK is its
-reference for engine structures and interfaces.
+Metamod:Source, which loads the toolkit, and s2sdk (formerly HL2SDK's `cs2`
+branch), which it compiles against, are AlliedModders LLC's work --
+Metamod:Source by David "BAILOPAN" Anderson and Scott "DS" Ehlert. The
+toolkit's plugin manager, interface sharing and GameDLL communication follow
+Metamod:Source's model, and s2sdk is its reference for engine structures and
+interfaces.
 
 ## KHook
 

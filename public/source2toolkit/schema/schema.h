@@ -194,7 +194,7 @@ public:
 
 // Referenced as a field type by locksound_t, CFuncMoveLinear, CFuncRotating and
 // CMessage, but absent from the schema dump, so the generator never emits it and
-// hl2sdk does not declare it either -- those four classes did not compile at all.
+// s2sdk does not declare it either -- those four classes did not compile at all.
 //
 // It is a pooled sound-event name, i.e. the same shape as the symbol type above,
 // and SCHEMA_FIELD needs a complete type (it takes sizeof of the field), so a

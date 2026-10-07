@@ -16,7 +16,7 @@ It bundles everything you need — headers, SDK, hooking system and build helper
 
 Source2Toolkit SDK is a lightweight development layer that provides:
 
-- Preconfigured **HL2SDK (CS2)**  
+- Preconfigured **s2sdk (CS2)** -- AlliedModders' Source 2 SDK, formerly hl2sdk's `cs2` branch  
 - Integrated **KHook** hooking (virtual, vtable and function detours), shared with Metamod  
 - Ready-to-use **Source 2 headers & interfaces**  
 - Cross-platform build configuration  
@@ -49,23 +49,38 @@ git submodule update --init --recursive
 
 ### 2. Get the dependencies
 
+**s2sdk** ([alliedmodders/s2sdk](https://github.com/alliedmodders/s2sdk), `cs2`
+branch) comes with the SDK as the `vendor/s2sdk` submodule, pinned to the
+commit the toolkit headers are built against -- the `--recursive` above
+already fetched it. If you keep your own checkout instead, point any one of
+these at it; the first one set wins over the submodule:
+
+```
+S2SDK_CS2, S2SDKCS2, S2SDK, HL2SDK_CS2, HL2SDKCS2
+```
+
+The **Protobufs** (the `csgo/` folder of
+[SteamDatabase/Protobufs](https://github.com/SteamDatabase/Protobufs)) come
+from `CSGO_PROTO`, or from `tools/deps.py`:
+
 ```bash
 python source2toolkit-sdk/tools/deps.py init
 ```
 
-Asks, once, whether **hl2sdk-cs2** and the **Protobufs** come from a checkout
-you already have (`HL2SDKCS2` / `CSGO_PROTO`) or should be downloaded into
-`vendor/`, and remembers the answer in `deps.json`. From then on
+Asks, once, whether **s2sdk** and the **Protobufs** come from a checkout you
+already have (the variables above / `CSGO_PROTO`) or from the SDK itself (the
+`vendor/s2sdk` submodule, a Protobufs clone under `vendor/`), and remembers
+the answer in `deps.json`. From then on
 
 ```bash
 python source2toolkit-sdk/tools/deps.py update
 ```
 
-pulls both, moves `vendor/khook` to the KHook commit metamod-source pins
-(anything else refuses to load on the toolkit core) and moves
-`vendor/hl2sdk-manifests` to its latest. `deps.py status` shows what is
-checked out. Answer up front with `--hl2sdk download --protobufs env` and the
-like when there is no terminal.
+pulls your checkouts, puts the submodule on the pinned commit, moves
+`vendor/khook` to the KHook commit metamod-source pins (anything else refuses
+to load on the toolkit core) and moves `vendor/hl2sdk-manifests` to its
+latest. `deps.py status` shows what is checked out. Answer up front with
+`--s2sdk submodule --protobufs env` and the like when there is no terminal.
 
 ---
 
@@ -98,7 +113,8 @@ my_plugin.stx
 
 ## What's Included
 
-- **HL2SDK-CS2** and **Protobufs** -- yours or downloaded, `tools/deps.py`  
+- **s2sdk (CS2)** -- the `vendor/s2sdk` submodule, or your own checkout  
+- **Protobufs** -- yours or downloaded, `tools/deps.py`  
 - **KHook** (virtual, vtable & function hooks) -- as the `vendor/khook` submodule, headers only    
 - **Tier0 / Tier1 / Mathlib**  
 - **Schema system headers**  

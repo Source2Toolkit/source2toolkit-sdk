@@ -87,13 +87,18 @@ jobs:
           sudo apt-get install -yq cmake ninja-build clang-18
           python3 -m pip install --quiet --break-system-packages vpk
 
+      - name: Move s2sdk to the head of its cs2 branch
+        run: |
+          # A CS2 update usually comes with an s2sdk one; the bump rides along in the PR.
+          git submodule update --init --remote vendor/s2sdk
+          git -C vendor/s2sdk log -1 --format='s2sdk: %h %s'
+
       - name: Clone the build dependencies
         run: |
-          # The same ones the toolkit core is built against (source2toolkit docker/docker-entrypoint.sh).
-          git clone -q --recursive --depth 1 --branch cs2 https://github.com/alliedmodders/hl2sdk.git "$RUNNER_TEMP/hl2sdk-cs2"
+          # The same ones the toolkit core is built against (source2toolkit docker/docker-entrypoint.sh);
+          # s2sdk is the vendor/s2sdk submodule, found by CMake without an env var.
           git clone -q --recursive --depth 1 --branch master https://github.com/alliedmodders/metamod-source.git "$RUNNER_TEMP/metamod-source"
           git clone -q --depth 1 https://github.com/SteamDatabase/Protobufs "$RUNNER_TEMP/Protobufs"
-          echo "HL2SDKCS2=$RUNNER_TEMP/hl2sdk-cs2" >> "$GITHUB_ENV"
           echo "MMSOURCE_DEV=$RUNNER_TEMP/metamod-source" >> "$GITHUB_ENV"
           echo "CSGO_PROTO=$RUNNER_TEMP/Protobufs/csgo" >> "$GITHUB_ENV"
 
@@ -161,4 +166,5 @@ jobs:
             tools/schemagen/server.json
             tools/schemadump/manifest
             public/source2toolkit/schema/entity/**
+            vendor/s2sdk
           delete-branch: true

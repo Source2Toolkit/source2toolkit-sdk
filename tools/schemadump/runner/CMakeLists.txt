@@ -1,12 +1,23 @@
 # Builds schemadump_runner.so (Linux only), see runner.cpp.
-# Needs HL2SDKCS2 and MMSOURCE_DEV in the environment, like the SDK itself.
+# Needs MMSOURCE_DEV in the environment; s2sdk is found like the SDK itself
+# does it (S2SDK_CS2 / S2SDKCS2 / S2SDK / HL2SDK_CS2 / HL2SDKCS2, else the
+# SDK's vendor/s2sdk submodule).
 cmake_minimum_required(VERSION 3.18)
 project(schemadump_runner CXX)
 
-if(NOT DEFINED ENV{HL2SDKCS2} OR NOT DEFINED ENV{MMSOURCE_DEV})
-    message(FATAL_ERROR "HL2SDKCS2 and MMSOURCE_DEV have to be set")
+if(NOT DEFINED ENV{MMSOURCE_DEV})
+    message(FATAL_ERROR "MMSOURCE_DEV has to be set")
 endif()
-set(HL2SDK $ENV{HL2SDKCS2})
+set(HL2SDK "${CMAKE_CURRENT_SOURCE_DIR}/../../../vendor/s2sdk")
+foreach(_var S2SDK_CS2 S2SDKCS2 S2SDK HL2SDK_CS2 HL2SDKCS2)
+    if(DEFINED ENV{${_var}} AND NOT "$ENV{${_var}}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{${_var}}" HL2SDK)
+        break()
+    endif()
+endforeach()
+if(NOT EXISTS "${HL2SDK}/public/eiface.h")
+    message(FATAL_ERROR "s2sdk not found at ${HL2SDK}")
+endif()
 set(MMSOURCE $ENV{MMSOURCE_DEV})
 
 set(CMAKE_CXX_STANDARD 20)

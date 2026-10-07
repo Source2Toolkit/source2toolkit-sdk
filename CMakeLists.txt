@@ -31,40 +31,58 @@ endif ()
 # DEPENDENCY PATHS
 # =========================
 
-function(resolve_dep OUT_VAR ENV_NAME)
+# ENV_NAMES is a list: the first variable that is set wins.
+function(resolve_dep OUT_VAR ENV_NAMES)
     # Already set -- by deps.cmake, which tools/deps.py writes when a
-    # dependency was downloaded into vendor/ rather than pointed at.
+    # dependency was chosen explicitly rather than read from the environment.
     if (DEFINED ${OUT_VAR} AND NOT "${${OUT_VAR}}" STREQUAL "")
-        message(STATUS "${ENV_NAME} -> ${${OUT_VAR}} (deps.cmake)")
+        message(STATUS "${OUT_VAR} -> ${${OUT_VAR}} (deps.cmake)")
         return()
     endif()
-    if (DEFINED ENV{${ENV_NAME}} AND NOT "$ENV{${ENV_NAME}}" STREQUAL "")
-        file(TO_CMAKE_PATH "$ENV{${ENV_NAME}}" _resolved)
-        set(${OUT_VAR} "${_resolved}" PARENT_SCOPE)
-        message(STATUS "${ENV_NAME} -> ${_resolved}")
-    elseif (ARGC GREATER 2)
+    foreach (_env ${ENV_NAMES})
+        if (DEFINED ENV{${_env}} AND NOT "$ENV{${_env}}" STREQUAL "")
+            file(TO_CMAKE_PATH "$ENV{${_env}}" _resolved)
+            set(${OUT_VAR} "${_resolved}" PARENT_SCOPE)
+            message(STATUS "${_env} -> ${_resolved}")
+            return()
+        endif()
+    endforeach()
+    if (ARGC GREATER 2)
         set(_fallback "${ARGV2}")
         set(${OUT_VAR} "${_fallback}" PARENT_SCOPE)
-        message(STATUS "${ENV_NAME} not set, using fallback: ${_fallback}")
+        message(STATUS "${ENV_NAMES} not set, using fallback: ${_fallback}")
     else()
-        message(FATAL_ERROR "${ENV_NAME} is not set")
+        message(FATAL_ERROR "${ENV_NAMES} is not set")
     endif()
 endfunction()
 
-# tools/deps.py: `init` picks, once, whether hl2sdk-cs2 and the Protobufs come
-# from a checkout you already have (HL2SDKCS2 / CSGO_PROTO) or from a clone it
-# makes under vendor/, and `update` keeps whichever it is current -- together
-# with vendor/khook, moved to the commit metamod-source pins. A downloaded
-# choice lands in deps.cmake and wins over the environment.
+# s2sdk (alliedmodders/s2sdk, the CS2 SDK that used to be hl2sdk's cs2 branch)
+# can be named by any of these; the newer names come first so a stale
+# HL2SDKCS2 left over from the hl2sdk days does not shadow them.
+set(S2SDK_ENV_VARS S2SDK_CS2 S2SDKCS2 S2SDK HL2SDK_CS2 HL2SDKCS2)
+
+# tools/deps.py: `init` picks, once, whether s2sdk and the Protobufs come from
+# a checkout you already have (the variables above / CSGO_PROTO) or from this
+# repo -- s2sdk is the vendor/s2sdk submodule, the Protobufs a clone under
+# vendor/ -- and `update` keeps whichever it is current, together with
+# vendor/khook, moved to the commit metamod-source pins. An explicit choice
+# lands in deps.cmake and wins over the environment.
 include("${CMAKE_CURRENT_SOURCE_DIR}/deps.cmake" OPTIONAL)
 
-resolve_dep(SOURCESDK HL2SDKCS2 "${CMAKE_CURRENT_SOURCE_DIR}/vendor/hl2sdk-cs2")
+# Without deps.py: the environment if set, else the submodule.
+resolve_dep(SOURCESDK "${S2SDK_ENV_VARS}" "${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2sdk")
 resolve_dep(PROTOBUFS CSGO_PROTO "${CMAKE_CURRENT_SOURCE_DIR}/vendor/Protobufs/csgo")
 
 if (NOT EXISTS "${SOURCESDK}/public/eiface.h")
     message(FATAL_ERROR
-            "hl2sdk-cs2 not found at ${SOURCESDK}. Set HL2SDKCS2 to your checkout, "
-            "or run `python tools/deps.py init` to point at one or download it.")
+            "s2sdk not found at ${SOURCESDK}. Set S2SDK (or HL2SDKCS2) to your checkout, "
+            "or fetch the submodule: git submodule update --init vendor/s2sdk")
+endif()
+
+# A plugin that adds this SDK with add_subdirectory() gets the same path.
+get_directory_property(_sdk_has_parent PARENT_DIRECTORY)
+if (_sdk_has_parent)
+    set(SOURCESDK "${SOURCESDK}" PARENT_SCOPE)
 endif()
 if (NOT EXISTS "${PROTOBUFS}/netmessages.proto")
     message(FATAL_ERROR

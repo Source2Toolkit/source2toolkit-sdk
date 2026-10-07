@@ -2,7 +2,7 @@
 //
 // Purpose: Engine-side client reconstruction for CS2, self-contained.
 //
-// Everything this needs that hl2sdk-cs2 does not ship is reconstructed inline
+// Everything this needs that s2sdk does not ship is reconstructed inline
 // below: the CNetMessagePB wrappers, CClientFrame/CClientFrameManager, and the
 // CUtlSlot/CUtlSignaller_Base base subobject.
 //
@@ -138,7 +138,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-// hl2sdk-cs2 only forward-declares CUtlSlot (engine/igameeventsystem.h) and has
+// s2sdk only forward-declares CUtlSlot (engine/igameeventsystem.h) and has
 // no CUtlSignaller_Base at all, so the base subobject is reconstructed here.
 // Layout only -- none of this is meant to be instantiated.
 //-----------------------------------------------------------------------------
@@ -306,7 +306,7 @@ public:
 public:
 	// The engine dispatches this through a family of CDelayedCallBase payloads
 	// (spawn group activate/deactivate, deferred SendNetMessage, baseline ack,
-	// disconnect, ...). hl2sdk-cs2 has no delayedcall.h, so only the vtable
+	// disconnect, ...). s2sdk has no delayedcall.h, so only the vtable
 	// slot is reproduced here.
 	virtual void             ExecuteDelayedCall( empty_t & ) = 0;
 
@@ -507,7 +507,7 @@ public:
 	double m_flHltvLastReplayRequestTime;
 	CUtlVector< INetMessage * > m_HltvQueuedMessages;
 	HltvReplayStats_t m_HltvReplayStats;
-	// CThreadedJobWithDependencies* -- hl2sdk-cs2 has no threadedjob.h
+	// CThreadedJobWithDependencies* -- s2sdk has no threadedjob.h
 	void *m_pSendJob;
 }; // sizeof 3968
 

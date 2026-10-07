@@ -30,6 +30,20 @@ ToolkitSdkTarget = globals().get('ToolkitSdkTarget', None)
 ToolkitSdkHelpers = globals().get('ToolkitSdkHelpers', None)
 
 
+# s2sdk (alliedmodders/s2sdk, the CS2 SDK that used to be hl2sdk's cs2 branch)
+# can be named by any of these, first set wins -- the same list as
+# CMakeLists.txt, newer names first so a stale HL2SDKCS2 does not shadow them.
+S2SDK_ENV_VARS = ['S2SDK_CS2', 'S2SDKCS2', 'S2SDK', 'HL2SDK_CS2', 'HL2SDKCS2']
+
+
+def ResolveS2SdkEnv():
+  for env in S2SDK_ENV_VARS:
+    path = os.environ.get(env)
+    if path and os.path.isdir(path):
+      return path
+  return None
+
+
 def ResolveEnvPath(env, folder):
   if env in os.environ:
     path = os.environ[env]
@@ -54,9 +68,11 @@ def DepsPath(sourcePath, dep):
   if not os.path.isfile(config_path):
     return None
   with open(config_path, "r") as f:
-    entry = json.load(f).get(dep) or {}
-  if entry.get("mode") == "download":
-    return os.path.join(sourcePath, "vendor", {"hl2sdk": "hl2sdk-cs2", "protobufs": os.path.join("Protobufs", "csgo")}[dep])
+    config = json.load(f)
+  # deps.json written before s2sdk called it "hl2sdk".
+  entry = config.get(dep) or (config.get("hl2sdk") if dep == "s2sdk" else None) or {}
+  if entry.get("mode") in ("submodule", "download"):
+    return os.path.join(sourcePath, "vendor", {"s2sdk": "s2sdk", "protobufs": os.path.join("Protobufs", "csgo")}[dep])
   return entry.get("path")
 
 
@@ -124,18 +140,26 @@ class ToolkitSdkConfig(object):
       raise Exception('No suitable C/C++ compiler was found.')
 
   def findSdkPath(self, sdk_name):
-    dir_name = 'hl2sdk-{}'.format(sdk_name)
+    # Order: --hl2sdk-root, an explicit deps.py choice, the environment, then
+    # the vendor/s2sdk submodule.
+    dir_names = ['s2sdk', 'hl2sdk-{}'.format(sdk_name)] if sdk_name == 'cs2' else ['hl2sdk-{}'.format(sdk_name)]
     if builder.options.hl2sdk_root:
-      sdk_path = os.path.join(builder.options.hl2sdk_root, dir_name)
-      if os.path.exists(sdk_path):
-        return sdk_path
-    deps = DepsPath(self.sourcePath, "hl2sdk") if sdk_name == "cs2" else None
+      for dir_name in dir_names:
+        sdk_path = os.path.join(builder.options.hl2sdk_root, dir_name)
+        if os.path.exists(sdk_path):
+          return sdk_path
+    if sdk_name != 'cs2':
+      return ResolveEnvPath('HL2SDK{}'.format(sdk_name.upper()), dir_names[0])
+    deps = DepsPath(self.sourcePath, "s2sdk")
     if deps and os.path.isdir(deps):
       return deps
-    vendored = os.path.join(self.sourcePath, "vendor", dir_name)
-    if os.path.isdir(vendored):
+    env = ResolveS2SdkEnv()
+    if env:
+      return env
+    vendored = os.path.join(self.sourcePath, "vendor", "s2sdk")
+    if os.path.isfile(os.path.join(vendored, "public", "eiface.h")):
       return vendored
-    return ResolveEnvPath('HL2SDK{}'.format(sdk_name.upper()), dir_name)
+    return None
 
   def detectSDKs(self):
     global SdkHelpers
@@ -161,6 +185,13 @@ class ToolkitSdkConfig(object):
     SdkHelpers = builder.Eval(
       os.path.join(manifests, 'SdkHelpers.ambuild'),
       {'Project': 'metamod'})
+    # s2sdk carries mathlib/AMBuilder, and hl2sdk-manifests builds any SDK library
+    # it finds an AMBuilder for -- with this project's compiler and flags, which
+    # that code does not compile under -- and links it ahead of the prebuilt
+    # lib/*/mathlib the manifest lists anyway. Keep to the prebuilt one, as with
+    # hl2sdk.
+    type(SdkHelpers).configureCxx.__globals__['SdkTarget'].findLibrary = \
+      staticmethod(lambda context, sdk, cxx, name: None)
 
     sdk_list = [s for s in builder.options.sdks.split(',') if s]
     SdkHelpers.find_sdk_path = self.findSdkPath
