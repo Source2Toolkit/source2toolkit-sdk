@@ -621,6 +621,8 @@ Globals
 // core runs. KHOOK_INIT() makes the check, the first time KHook is used.
 #define TOOLKIT_SAVEVARS() \
     g_ToolkitAPI = api; \
+    /* s2sdk's GameEntitySystem() (entity2/entitysystem.cpp) reads it */ \
+    g_pGameResourceServiceServer = api->GetGameResourceService(); \
     g_PluginAPI  = static_cast<IToolkitPlugin*>(this); \
     g_PluginID   = id; \
     KHook::__exported__khook = static_cast<KHook::IKHook*>(api->ToolkitFactory(TOOLKIT_KHOOK_INTERFACE, nullptr, nullptr)); \

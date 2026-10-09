@@ -31,63 +31,39 @@ endif ()
 # DEPENDENCY PATHS
 # =========================
 
-# ENV_NAMES is a list: the first variable that is set wins.
-function(resolve_dep OUT_VAR ENV_NAMES)
-    # Already set -- by deps.cmake, which tools/deps.py writes when a
-    # dependency was chosen explicitly rather than read from the environment.
-    if (DEFINED ${OUT_VAR} AND NOT "${${OUT_VAR}}" STREQUAL "")
-        message(STATUS "${OUT_VAR} -> ${${OUT_VAR}} (deps.cmake)")
-        return()
-    endif()
-    foreach (_env ${ENV_NAMES})
-        if (DEFINED ENV{${_env}} AND NOT "$ENV{${_env}}" STREQUAL "")
-            file(TO_CMAKE_PATH "$ENV{${_env}}" _resolved)
-            set(${OUT_VAR} "${_resolved}" PARENT_SCOPE)
-            message(STATUS "${_env} -> ${_resolved}")
-            return()
-        endif()
-    endforeach()
-    if (ARGC GREATER 2)
-        set(_fallback "${ARGV2}")
-        set(${OUT_VAR} "${_fallback}" PARENT_SCOPE)
-        message(STATUS "${ENV_NAMES} not set, using fallback: ${_fallback}")
-    else()
-        message(FATAL_ERROR "${ENV_NAMES} is not set")
-    endif()
-endfunction()
-
-# s2sdk (alliedmodders/s2sdk, the CS2 SDK that used to be hl2sdk's cs2 branch)
-# can be named by any of these; the newer names come first so a stale
-# HL2SDKCS2 left over from the hl2sdk days does not shadow them.
-set(S2SDK_ENV_VARS S2SDK_CS2 S2SDKCS2 S2SDK HL2SDK_CS2 HL2SDKCS2)
-
-# tools/deps.py: `init` picks, once, whether s2sdk and the Protobufs come from
-# a checkout you already have (the variables above / CSGO_PROTO) or from this
-# repo -- s2sdk is the vendor/s2sdk submodule, the Protobufs a clone under
-# vendor/ -- and `update` keeps whichever it is current, together with
-# vendor/khook, moved to the commit metamod-source pins. An explicit choice
-# lands in deps.cmake and wins over the environment.
+# s2sdk (alliedmodders/s2sdk, the CS2 SDK that used to be hl2sdk's cs2 branch).
+# In order:
+#  - SOURCESDK from deps.cmake, which tools/deps.py writes for an explicit
+#    choice (the submodule, or a typed path);
+#  - the first of these variables that is set -- the newer names first, so a
+#    stale HL2SDKCS2 left over from the hl2sdk days does not shadow them;
+#  - the vendor/s2sdk submodule.
 include("${CMAKE_CURRENT_SOURCE_DIR}/deps.cmake" OPTIONAL)
 
-# Without deps.py: the environment if set, else the submodule.
-resolve_dep(SOURCESDK "${S2SDK_ENV_VARS}" "${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2sdk")
-resolve_dep(PROTOBUFS CSGO_PROTO "${CMAKE_CURRENT_SOURCE_DIR}/vendor/Protobufs/csgo")
+if (DEFINED SOURCESDK AND NOT "${SOURCESDK}" STREQUAL "")
+    message(STATUS "s2sdk -> ${SOURCESDK} (deps.cmake)")
+else()
+    set(SOURCESDK "${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2sdk")
+    foreach (_env S2SDK_CS2 S2SDKCS2 S2SDK HL2SDK_CS2 HL2SDKCS2)
+        if (DEFINED ENV{${_env}} AND NOT "$ENV{${_env}}" STREQUAL "")
+            file(TO_CMAKE_PATH "$ENV{${_env}}" SOURCESDK)
+            break()
+        endif()
+    endforeach()
+    message(STATUS "s2sdk -> ${SOURCESDK}")
+endif()
 
-if (NOT EXISTS "${SOURCESDK}/public/eiface.h")
+if (NOT EXISTS "${SOURCESDK}/CMakeLists.txt")
     message(FATAL_ERROR
-            "s2sdk not found at ${SOURCESDK}. Set S2SDK (or HL2SDKCS2) to your checkout, "
-            "or fetch the submodule: git submodule update --init vendor/s2sdk")
+            "s2sdk not found at ${SOURCESDK}, or too old to have its CMake support. Set S2SDK "
+            "(or HL2SDKCS2) to your checkout, or fetch the submodule: "
+            "git submodule update --init --recursive vendor/s2sdk")
 endif()
 
 # A plugin that adds this SDK with add_subdirectory() gets the same path.
 get_directory_property(_sdk_has_parent PARENT_DIRECTORY)
 if (_sdk_has_parent)
     set(SOURCESDK "${SOURCESDK}" PARENT_SCOPE)
-endif()
-if (NOT EXISTS "${PROTOBUFS}/netmessages.proto")
-    message(FATAL_ERROR
-            "Protobufs (csgo/) not found at ${PROTOBUFS}. Set CSGO_PROTO to the csgo/ folder "
-            "of a SteamTracking/Protobufs checkout, or run `python tools/deps.py init`.")
 endif()
 
 # =========================
@@ -160,42 +136,24 @@ if (SOURCE2TOOLKIT_CORE AND GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ve
     endif ()
 endif ()
 
-set(SOURCESDK_LIB ${SOURCESDK}/lib)
-
-# =========================
-# PROTOBUF
-# =========================
-
-include(protobuf.cmake)
-
 # =========================
 # GLOBAL CONFIG
 # =========================
+#
+# On top of what s2sdk::headers already defines for its headers.
 
 add_library(source2toolkit-config INTERFACE)
 
 target_compile_definitions(source2toolkit-config INTERFACE
         META_IS_SOURCE2
         _ITERATOR_DEBUG_LEVEL=0
-        X64BITS
 
         $<$<PLATFORM_ID:Linux>:
-        _LINUX POSIX LINUX GNUC COMPILER_GCC PLATFORM_64BITS
         _FILE_OFFSET_BITS=64
-        _GLIBCXX_USE_CXX11_ABI=0
-
-        stricmp=strcasecmp
-        _stricmp=strcasecmp
-        strnicmp=strncasecmp
-        _strnicmp=strncasecmp
         _snprintf=snprintf
-        _vsnprintf=vsnprintf
-        _alloca=alloca
-        strcmpi=strcasecmp
         >
 
         $<$<PLATFORM_ID:Windows>:
-        COMPILER_MSVC COMPILER_MSVC64
         _WIN32 _WINDOWS
         _ALLOW_KEYWORD_MACROS
         __STDC_LIMIT_MACROS
@@ -257,17 +215,45 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 # S2SDK
 # =========================
 #
-# An s2sdk with its own CMakeLists.txt gives its include paths, defines and
-# libraries as s2sdk::s2sdk; for one without it they are listed below.
+# Its include paths, defines and libraries as s2sdk::s2sdk, and
+# s2sdk_protobufs() for the game protobufs.
 
-set(S2SDK_HAS_CMAKE OFF)
-if (EXISTS "${SOURCESDK}/CMakeLists.txt")
-    set(S2SDK_HAS_CMAKE ON)
-    if (NOT TARGET s2sdk)
-        add_subdirectory(${SOURCESDK} ${CMAKE_CURRENT_BINARY_DIR}/s2sdk)
-    endif()
+if (NOT TARGET s2sdk)
+    add_subdirectory(${SOURCESDK} ${CMAKE_CURRENT_BINARY_DIR}/s2sdk)
 endif()
-message(STATUS "s2sdk CMake targets: ${S2SDK_HAS_CMAKE}")
+if (NOT COMMAND s2sdk_protobufs)
+    message(FATAL_ERROR
+            "s2sdk at ${SOURCESDK} has no s2sdk_protobufs(): update it")
+endif()
+
+# The game protobufs, generated from s2sdk's own protos into the Protobufs
+# library the toolkit and everything linking it share.
+add_library(Protobufs STATIC)
+target_link_libraries(Protobufs PUBLIC s2sdk::s2sdk)
+s2sdk_protobufs(Protobufs
+        common/network_connection.proto
+        common/networkbasetypes.proto
+        game/shared/cs/cs_gameevents.proto
+        game/shared/cs/cs_usercmd.proto
+        game/shared/base_gcmessages.proto
+        game/shared/econ/econ_gcmessages.proto
+        common/engine_gcmessages.proto
+        gcsdk/gcsdk_gcmessages.proto
+        gcsdk/gcsystemmsgs.proto
+        game/shared/cstrike15/cstrike15_gcmessages.proto
+        game/shared/cstrike15/cstrike15_usermessages.proto
+        common/source2_steam_stats.proto
+        common/netmessages.proto
+        networksystem/networksystem_protomessages.proto
+        gcsdk/steammessages.proto
+        game/shared/usercmd.proto
+        game/shared/usermessages.proto
+        game/shared/gameevents.proto
+        game/shared/clientmessages.proto
+        game/shared/te.proto
+        common/valveextensions.proto
+)
+set_target_properties(Protobufs PROPERTIES FOLDER SDK POSITION_INDEPENDENT_CODE ON)
 
 # =========================
 # SDK LIB
@@ -312,22 +298,6 @@ target_include_directories(source2toolkit-sdk PUBLIC
         ${KHOOK_DIR}/include
 )
 
-if (NOT S2SDK_HAS_CMAKE)
-    target_include_directories(source2toolkit-sdk PUBLIC
-            ${SOURCESDK}/thirdparty/protobuf-3.21.8/src
-            ${SOURCESDK}/common
-            ${SOURCESDK}/game/shared
-            ${SOURCESDK}/game/server
-            ${SOURCESDK}/public
-            ${SOURCESDK}/public/engine
-            ${SOURCESDK}/public/mathlib
-            ${SOURCESDK}/public/tier0
-            ${SOURCESDK}/public/tier1
-            ${SOURCESDK}/public/entity2
-            ${SOURCESDK}/public/game/server
-    )
-endif()
-
 # Which KHook this binary -- and everything linking it -- was compiled
 # against. Read back by TOOLKIT_SAVEVARS() and by the core's ToolkitFactory.
 target_compile_definitions(source2toolkit-sdk PUBLIC
@@ -338,31 +308,11 @@ target_compile_definitions(source2toolkit-sdk PUBLIC
 # LINK SDK DEPENDENCIES
 # =========================
 
-if (S2SDK_HAS_CMAKE)
-    target_link_libraries(source2toolkit-sdk PUBLIC
-            s2sdk::s2sdk
-            s2sdk::steam_api
-            Protobufs
-    )
-elseif (LINUX)
-    target_link_libraries(source2toolkit-sdk PUBLIC
-            ${SOURCESDK_LIB}/linux64/libtier0.so
-            ${SOURCESDK_LIB}/linux64/interfaces.a
-            ${SOURCESDK_LIB}/linux64/mathlib.a
-            ${SOURCESDK_LIB}/linux64/release/libprotobuf.a
-            ${SOURCESDK_LIB}/linux64/libsteam_api.so
-            Protobufs
-    )
-elseif (WIN32)
-    target_link_libraries(source2toolkit-sdk PUBLIC
-            ${SOURCESDK_LIB}/public/win64/tier0.lib
-            ${SOURCESDK_LIB}/public/win64/interfaces.lib
-            ${SOURCESDK_LIB}/public/win64/mathlib.lib
-            ${SOURCESDK_LIB}/public/win64/2015/libprotobuf.lib
-            ${SOURCESDK_LIB}/public/win64/steam_api64.lib
-            Protobufs
-    )
-endif()
+target_link_libraries(source2toolkit-sdk PUBLIC
+        s2sdk::s2sdk
+        s2sdk::steam_api
+        Protobufs
+)
 
 # =========================
 # HELPER

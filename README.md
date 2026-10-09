@@ -52,35 +52,30 @@ git submodule update --init --recursive
 **s2sdk** ([alliedmodders/s2sdk](https://github.com/alliedmodders/s2sdk), `cs2`
 branch) comes with the SDK as the `vendor/s2sdk` submodule, pinned to the
 commit the toolkit headers are built against -- the `--recursive` above
-already fetched it. If you keep your own checkout instead, point any one of
-these at it; the first one set wins over the submodule:
+already fetched it, game protobufs included (s2sdk's own `.proto` files, which
+the SDK generates into its `Protobufs` library). Nothing else to set up.
+
+If you keep your own s2sdk checkout instead, point any one of these at it; the
+first one set wins over the submodule:
 
 ```
 S2SDK_CS2, S2SDKCS2, S2SDK, HL2SDK_CS2, HL2SDKCS2
 ```
 
-The **Protobufs** (the `csgo/` folder of
-[SteamTracking/Protobufs](https://github.com/SteamTracking/Protobufs)) come
-from `CSGO_PROTO`, or from `tools/deps.py`:
+`tools/deps.py` remembers that choice and keeps everything current:
 
 ```bash
 python source2toolkit-sdk/tools/deps.py init
-```
-
-Asks, once, whether **s2sdk** and the **Protobufs** come from a checkout you
-already have (the variables above / `CSGO_PROTO`) or from the SDK itself (the
-`vendor/s2sdk` submodule, a Protobufs clone under `vendor/`), and remembers
-the answer in `deps.json`. From then on
-
-```bash
 python source2toolkit-sdk/tools/deps.py update
 ```
 
-pulls your checkouts, puts the submodule on the pinned commit, moves
-`vendor/khook` to the KHook commit metamod-source pins (anything else refuses
-to load on the toolkit core) and moves `vendor/hl2sdk-manifests` to its
-latest. `deps.py status` shows what is checked out. Answer up front with
-`--s2sdk submodule --protobufs env` and the like when there is no terminal.
+`init` asks, once, whether s2sdk is a checkout you already have or the
+submodule, and saves the answer in `deps.json`. `update` pulls your checkout
+or puts the submodule on the pinned commit, moves `vendor/khook` to the KHook
+commit metamod-source pins (anything else refuses to load on the toolkit core)
+and moves `vendor/hl2sdk-manifests` to its latest. `deps.py status` shows what
+is checked out. Answer up front with `--s2sdk submodule` when there is no
+terminal.
 
 ---
 
@@ -114,7 +109,7 @@ my_plugin.stx
 ## What's Included
 
 - **s2sdk (CS2)** -- the `vendor/s2sdk` submodule, or your own checkout  
-- **Protobufs** -- yours or downloaded, `tools/deps.py`  
+- **Protobufs** -- the game's, generated from s2sdk's own `.proto` files  
 - **KHook** (virtual, vtable & function hooks) -- as the `vendor/khook` submodule, headers only    
 - **Tier0 / Tier1 / Mathlib**  
 - **Schema system headers**  

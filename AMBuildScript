@@ -61,18 +61,18 @@ def ResolveEnvPath(env, folder):
   return None
 
 
-def DepsPath(sourcePath, dep):
-  """Where tools/deps.py put or pointed a dependency (deps.json), or None when
-  it was never run or the dependency follows the environment variable."""
+def DepsPath(sourcePath):
+  """Where tools/deps.py pointed s2sdk (deps.json), or None when it was never
+  run or s2sdk follows the environment variable."""
   config_path = os.path.join(sourcePath, "deps.json")
   if not os.path.isfile(config_path):
     return None
   with open(config_path, "r") as f:
     config = json.load(f)
   # deps.json written before s2sdk called it "hl2sdk".
-  entry = config.get(dep) or (config.get("hl2sdk") if dep == "s2sdk" else None) or {}
+  entry = config.get("s2sdk") or config.get("hl2sdk") or {}
   if entry.get("mode") in ("submodule", "download"):
-    return os.path.join(sourcePath, "vendor", {"s2sdk": "s2sdk", "protobufs": os.path.join("Protobufs", "csgo")}[dep])
+    return os.path.join(sourcePath, "vendor", "s2sdk")
   return entry.get("path")
 
 
@@ -150,7 +150,7 @@ class ToolkitSdkConfig(object):
           return sdk_path
     if sdk_name != 'cs2':
       return ResolveEnvPath('HL2SDK{}'.format(sdk_name.upper()), dir_names[0])
-    deps = DepsPath(self.sourcePath, "s2sdk")
+    deps = DepsPath(self.sourcePath)
     if deps and os.path.isdir(deps):
       return deps
     env = ResolveS2SdkEnv()
@@ -329,24 +329,43 @@ class ToolkitSdkConfig(object):
       os.path.join(sdk['path'], 'thirdparty', 'protobuf-3.21.8', 'src'),
     ]
 
-  def ProtoSources(self, sdk_target):
-    proto_dir = DepsPath(self.sourcePath, "protobufs") or os.environ.get("CSGO_PROTO")
-    if not proto_dir:
-      vendored = os.path.join(self.sourcePath, "vendor", "Protobufs", "csgo")
-      proto_dir = vendored if os.path.isdir(vendored) else None
-    if not proto_dir:
-      raise Exception("CSGO_PROTO is not set -- point it at the csgo/ folder of a "
-                      "SteamTracking/Protobufs checkout, or run python tools/deps.py init")
-
+  def ProtoSources(self, sdk):
+    # The game protobufs, from s2sdk's own protos.
     names = [
-      'network_connection', 'networkbasetypes', 'cs_gameevents', 'cs_usercmd',
-      'base_gcmessages', 'econ_gcmessages', 'engine_gcmessages', 'gcsdk_gcmessages',
-      'gcsystemmsgs', 'cstrike15_gcmessages', 'cstrike15_usermessages',
-      'source2_steam_stats', 'netmessages', 'networksystem_protomessages',
-      'steammessages', 'usercmd', 'usermessages', 'gameevents', 'clientmessages',
-      'te', 'valveextensions',
+      'common/network_connection.proto',
+      'common/networkbasetypes.proto',
+      'game/shared/cs/cs_gameevents.proto',
+      'game/shared/cs/cs_usercmd.proto',
+      'game/shared/base_gcmessages.proto',
+      'game/shared/econ/econ_gcmessages.proto',
+      'common/engine_gcmessages.proto',
+      'gcsdk/gcsdk_gcmessages.proto',
+      'gcsdk/gcsystemmsgs.proto',
+      'game/shared/cstrike15/cstrike15_gcmessages.proto',
+      'game/shared/cstrike15/cstrike15_usermessages.proto',
+      'common/source2_steam_stats.proto',
+      'common/netmessages.proto',
+      'networksystem/networksystem_protomessages.proto',
+      'gcsdk/steammessages.proto',
+      'game/shared/usercmd.proto',
+      'game/shared/usermessages.proto',
+      'game/shared/gameevents.proto',
+      'game/shared/clientmessages.proto',
+      'game/shared/te.proto',
+      'common/valveextensions.proto',
     ]
-    return [os.path.join(proto_dir, '{}.proto'.format(n)) for n in names]
+    return [os.path.join(sdk['path'], *name.split('/')) for name in names]
+
+  def Protoc(self, builder, sdk_target):
+    # The protos import each other by name, also from folders hl2sdk-manifests
+    # doesn't search.
+    sdk = sdk_target.sdk
+    protoc = builder.tools.Protoc(protoc=sdk_target.protoc, sources=self.ProtoSources(sdk))
+    protoc.protoc.includes += [
+      os.path.join(sdk['path'], 'gcsdk'),
+      os.path.join(sdk['path'], 'game', 'shared', 'cstrike15'),
+    ]
+    return protoc
 
   def Library(self, cxx, name):
     return cxx.StaticLibrary(name)
@@ -382,8 +401,7 @@ class ToolkitSdkConfig(object):
         os.path.join(sdk['path'], 'entity2', 'entitykeyvalues.cpp'),
       ]
 
-      lib.custom = [builder.tools.Protoc(protoc=sdk_target.protoc,
-                                         sources=self.ProtoSources(sdk_target))]
+      lib.custom = [self.Protoc(builder, sdk_target)]
 
       node = builder.Add(lib)
       self.binaries += [node]

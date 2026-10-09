@@ -87,20 +87,43 @@ class ToolkitSdkPlugin(object):
 
     return sources
 
-  def ProtoSources(self):
-    proto_dir = os.environ.get('CSGO_PROTO')
-    if not proto_dir:
-      raise Exception('CSGO_PROTO is not set')
-
+  def ProtoSources(self, sdk):
+    # The game protobufs, from s2sdk's own protos.
     names = [
-      'network_connection', 'networkbasetypes', 'cs_gameevents', 'cs_usercmd',
-      'base_gcmessages', 'econ_gcmessages', 'engine_gcmessages', 'gcsdk_gcmessages',
-      'gcsystemmsgs', 'cstrike15_gcmessages', 'cstrike15_usermessages',
-      'source2_steam_stats', 'netmessages', 'networksystem_protomessages',
-      'steammessages', 'usercmd', 'usermessages', 'gameevents', 'clientmessages',
-      'te', 'valveextensions',
+      'common/network_connection.proto',
+      'common/networkbasetypes.proto',
+      'game/shared/cs/cs_gameevents.proto',
+      'game/shared/cs/cs_usercmd.proto',
+      'game/shared/base_gcmessages.proto',
+      'game/shared/econ/econ_gcmessages.proto',
+      'common/engine_gcmessages.proto',
+      'gcsdk/gcsdk_gcmessages.proto',
+      'gcsdk/gcsystemmsgs.proto',
+      'game/shared/cstrike15/cstrike15_gcmessages.proto',
+      'game/shared/cstrike15/cstrike15_usermessages.proto',
+      'common/source2_steam_stats.proto',
+      'common/netmessages.proto',
+      'networksystem/networksystem_protomessages.proto',
+      'gcsdk/steammessages.proto',
+      'game/shared/usercmd.proto',
+      'game/shared/usermessages.proto',
+      'game/shared/gameevents.proto',
+      'game/shared/clientmessages.proto',
+      'game/shared/te.proto',
+      'common/valveextensions.proto',
     ]
-    return [os.path.join(proto_dir, '{}.proto'.format(n)) for n in names]
+    return [os.path.join(sdk['path'], *name.split('/')) for name in names]
+
+  def Protoc(self, builder, sdk_target):
+    # The protos import each other by name, also from folders hl2sdk-manifests
+    # doesn't search.
+    sdk = sdk_target.sdk
+    protoc = builder.tools.Protoc(protoc=sdk_target.protoc, sources=self.ProtoSources(sdk))
+    protoc.protoc.includes += [
+      os.path.join(sdk['path'], 'gcsdk'),
+      os.path.join(sdk['path'], 'game', 'shared', 'cstrike15'),
+    ]
+    return protoc
 
   def Defines(self, binary):
     binary.compiler.defines += [
@@ -119,6 +142,14 @@ class ToolkitSdkPlugin(object):
     self.AddSdkIncludes(binary, sdk)
     self.Defines(binary)
     binary.sources += self.Sources(sdk)
+    self.AddSteamApi(binary, sdk)
+
+  def AddSteamApi(self, binary, sdk):
+    # Every plugin links s2sdk's Steam API, as with CMake (s2sdk::steam_api).
+    if binary.compiler.target.platform == 'linux':
+      binary.compiler.postlink += [os.path.join(sdk['path'], 'lib', 'linux64', 'libsteam_api.so')]
+    elif binary.compiler.target.platform == 'windows':
+      binary.compiler.postlink += [os.path.join(sdk['path'], 'lib', 'public', 'win64', 'steam_api64.lib')]
 
 
 rvalue = ToolkitSdkPlugin()

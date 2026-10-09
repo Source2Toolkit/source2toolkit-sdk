@@ -418,7 +418,7 @@ using CSource2Server_GetNavMeshData_t = bool (FASTCALL*)(ISource2Server* pThis, 
 /** @brief CLoggingSystem::LogDirect (tier0) -- the member behind LoggingSystem_LogDirect. */
 using CLoggingSystem_LogDirect_t = LoggingResponse_t (FASTCALL*)(CLoggingSystem* pThis, LoggingChannelID_t nChannelID,
                                                                  LoggingSeverity_t nSeverity,
-                                                                 const LeafCodeInfo_t* pCodeInfo,
+                                                                 const LoggingRareOptions_t* pRareOptions,
                                                                  const LoggingMetaData_t* pMetaData, Color color,
                                                                  const char* pszMessage);
 

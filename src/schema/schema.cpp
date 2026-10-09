@@ -69,8 +69,6 @@ TOOLKIT_GLOBALVARS();
 #define MODULE_EXT ".so"
 #endif
 
-CGameEntitySystem* GameEntitySystem() { return GetEntitySystem(); }
-
 IGameEventManager2* GetGameEventManager()
 {
     return g_ToolkitAPI->GetGameEventManager();

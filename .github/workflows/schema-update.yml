@@ -90,17 +90,16 @@ jobs:
       - name: Move s2sdk to the head of its cs2 branch
         run: |
           # A CS2 update usually comes with an s2sdk one; the bump rides along in the PR.
-          git submodule update --init --remote vendor/s2sdk
+          git submodule update --init --recursive --remote vendor/s2sdk
           git -C vendor/s2sdk log -1 --format='s2sdk: %h %s'
 
       - name: Clone the build dependencies
         run: |
           # The same ones the toolkit core is built against (source2toolkit docker/docker-entrypoint.sh);
-          # s2sdk is the vendor/s2sdk submodule, found by CMake without an env var.
+          # s2sdk, with the game protobufs, is the vendor/s2sdk submodule, found by
+          # CMake without an env var.
           git clone -q --recursive --depth 1 --branch master https://github.com/alliedmodders/metamod-source.git "$RUNNER_TEMP/metamod-source"
-          git clone -q --depth 1 https://github.com/SteamTracking/Protobufs "$RUNNER_TEMP/Protobufs"
           echo "MMSOURCE_DEV=$RUNNER_TEMP/metamod-source" >> "$GITHUB_ENV"
-          echo "CSGO_PROTO=$RUNNER_TEMP/Protobufs/csgo" >> "$GITHUB_ENV"
 
       - name: Dump the schema
         env:
