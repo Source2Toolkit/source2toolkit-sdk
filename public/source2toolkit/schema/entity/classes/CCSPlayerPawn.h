@@ -181,6 +181,7 @@ public:
     SCHEMA_FIELD(bool, m_wasNotKilledNaturally);
     SCHEMA_FIELD(float, m_fImmuneToGunGameDamageTime);
     SCHEMA_FIELD(bool, m_bGunGameImmunity);
+    SCHEMA_FIELD(float, m_flModifier0);
     SCHEMA_FIELD(float, m_fMolotovDamageTime);
     SCHEMA_FIELD(QAngle, m_angEyeAngles);
 

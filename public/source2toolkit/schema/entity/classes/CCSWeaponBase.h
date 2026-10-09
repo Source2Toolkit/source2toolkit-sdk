@@ -91,6 +91,7 @@ public:
     SCHEMA_FIELD(float, m_flPostponeFireReadyFrac);
     SCHEMA_FIELD(bool, m_bInReload);
     SCHEMA_FIELD(int32_t, m_nDeployTick);
+    SCHEMA_FIELD(float, m_flAttackHoldStartTime);
     SCHEMA_FIELD(float, m_flDroppedAtTime);
     SCHEMA_FIELD(bool, m_bIsHauledBack);
     SCHEMA_FIELD(bool, m_bSilencerOn);

@@ -136,7 +136,7 @@ public:
     CUtlString GetIpAddress();
     /// <summary>Replicate convar.</summary>
     void ReplicateConVar(const char* pszConVar, const char* pszValue);
-    /// <summary>Fires gameEvent to client's legacy listener.</summary>
+    /// <summary>Fires gameEvent to client's legacy listener. Does not take ownership: the caller still frees pEvent.</summary>
     void FireEventToClient(IGameEvent* pEvent);
 
 public:
