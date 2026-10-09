@@ -59,71 +59,18 @@
 #include "entityhandle.h"
 #include "entityinstance.h"
 #include "entitysystem.h"
+#include "entity2/ientity2_entityio.h"
+#include "entity2/entitycomponent.h"
 #include "string_t.h"
 #include "source2toolkit/IToolkitPlugin.h"
 
 /* =========================
-Connection descriptors
+Connections and outputs
 ========================= */
 
-/**
-
-* @brief Describes a single output connection.
-*
-* Example (Hammer):
-* OnTrigger -> target_entity -> input_name
-  */
-struct EntityIOConnectionDesc_t
-{
-    string_t m_targetDesc; ///< Target entity name
-    string_t m_targetInput; ///< Input name to call
-    string_t m_valueOverride; ///< Override value
-    CEntityHandle m_hTarget; ///< Target handle
-    EntityIOTargetType_t m_nTargetType;
-    int32 m_nTimesToFire; ///< How many times it can fire
-    float m_flDelay; ///< Delay before firing
-};
-
-/**
-
-* @brief Runtime connection node.
-  */
-struct EntityIOConnection_t : EntityIOConnectionDesc_t
-{
-    bool m_bMarkedForRemoval;
-    EntityIOConnection_t* m_pNext;
-};
-
-/* =========================
-Output system
-========================= */
-
-/**
-
-* @brief Output metadata.
-  */
-struct EntityIOOutputDesc_t
-{
-    const char* m_pName; ///< Output name (e.g. "OnTrigger")
-    uint32 m_nFlags;
-    uint32 m_nOutputOffset;
-};
-
-/**
-
-* @brief Represents an entity output.
-  */
-class CEntityIOOutput
-{
-public:
-    void* vtable;
-
-    /// Linked list of connections
-    EntityIOConnection_t* m_pConnections;
-
-    /// Output descriptor
-    EntityIOOutputDesc_t* m_pDesc;
-};
+// EntityIOConnectionDesc_t, EntityIOConnection_t, CEntityIOOutput (whose m_pDesc
+// is an EntOutput_t) and CEntityOutputTemplate<T> are s2sdk's:
+// entity2/ientity2_entityio.h and entity2/entitycomponent.h.
 
 /* =========================
 Input system
