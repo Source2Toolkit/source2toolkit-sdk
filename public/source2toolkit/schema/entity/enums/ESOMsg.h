@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ESOMSG_H
 #define _INCLUDE_ESOMSG_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

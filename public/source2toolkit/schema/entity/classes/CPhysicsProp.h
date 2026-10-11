@@ -36,28 +36,30 @@
 
 #ifndef _INCLUDE_CPHYSICSPROP_H
 #define _INCLUDE_CPHYSICSPROP_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
-
-#include "CBreakableProp.h"
 #include "../enums/CPhysicsProp__CrateType_t.h"
 #include "../enums/DynamicContinuousContactBehavior_t.h"
 #include "../enums/INavObstacle__NavObstacleType_t.h"
+#include "CBaseEntity.h"
+#include "CBreakableProp.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CPhysicsProp : public CBreakableProp
 {

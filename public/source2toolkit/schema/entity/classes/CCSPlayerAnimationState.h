@@ -36,27 +36,29 @@
 
 #ifndef _INCLUDE_CCSPLAYERANIMATIONSTATE_H
 #define _INCLUDE_CCSPLAYERANIMATIONSTATE_H
-
+#ifdef _WIN32
 #pragma once
-
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
+#endif
 
 #include "../enums/CCSPlayerAnimationState__AirAction_t.h"
 #include "../enums/CCSPlayerAnimationState__Direction_t.h"
 #include "../enums/CCSPlayerAnimationState__GroundMoveState_t.h"
 #include "../enums/CCSPlayerAnimationState__MoveType_t.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSPlayerAnimationState
 {

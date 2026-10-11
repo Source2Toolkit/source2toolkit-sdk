@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ESPLITSCREENMESSAGETYPE_H
 #define _INCLUDE_ESPLITSCREENMESSAGETYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

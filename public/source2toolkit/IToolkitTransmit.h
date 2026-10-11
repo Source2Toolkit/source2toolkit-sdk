@@ -75,9 +75,9 @@
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
-#include "bitvec.h"
-#include "const.h"
-#include "playerslot.h"
+#include <bitvec.h>
+#include <const.h>
+#include <playerslot.h>
 
 #include <cstdint>
 #include <functional>

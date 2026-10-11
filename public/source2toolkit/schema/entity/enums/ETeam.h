@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ETEAM_H
 #define _INCLUDE_ETEAM_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

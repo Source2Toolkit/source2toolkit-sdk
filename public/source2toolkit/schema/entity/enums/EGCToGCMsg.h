@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_EGCTOGCMSG_H
 #define _INCLUDE_EGCTOGCMSG_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

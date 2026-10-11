@@ -34,9 +34,8 @@
  * Project: Source2Toolkit
  */
 
-#include "source2toolkit/IToolkitModule.h"
-
 #include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitModule.h"
 #include "source2toolkit/IToolkitPlugin.h"
 TOOLKIT_GLOBALVARS();
 

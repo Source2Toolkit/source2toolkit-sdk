@@ -36,28 +36,30 @@
 
 #ifndef _INCLUDE_CCSPLAYERCONTROLLER_H
 #define _INCLUDE_CCSPLAYERCONTROLLER_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/QuestProgress__Reason.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CBasePlayerController.h"
+#include "IntervalTimer.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "shareddefs.h"
-#include "CBasePlayerController.h"
-#include "IntervalTimer.h"
-#include "../enums/QuestProgress__Reason.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <shareddefs.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSObserverPawn;
 class CCSPlayerController_ActionTrackingServices;

@@ -36,25 +36,27 @@
 
 #ifndef _INCLUDE_CCSGAMERULES_H
 #define _INCLUDE_CCSGAMERULES_H
-
+#ifdef _WIN32
 #pragma once
-
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
+#endif
 
 #include "CRetakeGameRules.h"
 #include "CTeamplayRules.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBaseEntity;
 class CBasePlayerController;

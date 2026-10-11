@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,12 +36,11 @@
 
 #include "source2toolkit/schema/entity/classes/CBaseModelEntity.h"
 
-#include "source2toolkit/schema/entity/classes/CBodyComponent.h"
-#include "source2toolkit/schema/entity/classes/CSkeletonInstance.h"
-
 #include "source2toolkit/IToolkitAddresses.h"
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entity/classes/CBodyComponent.h"
+#include "source2toolkit/schema/entity/classes/CSkeletonInstance.h"
 TOOLKIT_GLOBALVARS();
 
 CUtlSymbolLarge CBaseModelEntity::GetModelName()

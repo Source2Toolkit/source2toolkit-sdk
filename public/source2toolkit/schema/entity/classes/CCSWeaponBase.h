@@ -36,28 +36,30 @@
 
 #ifndef _INCLUDE_CCSWEAPONBASE_H
 #define _INCLUDE_CCSWEAPONBASE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/CSWeaponMode.h"
+#include "../enums/WeaponGameplayAnimState.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CBasePlayerWeapon.h"
+#include "CIronSightController.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CBasePlayerWeapon.h"
-#include "CIronSightController.h"
-#include "../enums/CSWeaponMode.h"
-#include "../enums/WeaponGameplayAnimState.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSPlayerPawn;
 

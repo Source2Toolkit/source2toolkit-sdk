@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_CNMVECTORINFONODE__INFO_T_H
 #define _INCLUDE_CNMVECTORINFONODE__INFO_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

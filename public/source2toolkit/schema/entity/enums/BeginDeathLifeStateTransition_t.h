@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_BEGINDEATHLIFESTATETRANSITION_T_H
 #define _INCLUDE_BEGINDEATHLIFESTATETRANSITION_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

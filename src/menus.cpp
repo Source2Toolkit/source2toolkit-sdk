@@ -5,12 +5,10 @@
 //          declared by the time the class body is parsed.
 //
 //=============================================================================//
-#include "source2toolkit/IToolkitMenus.h"
-
-#include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
-
 #include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitMenus.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
 TOOLKIT_GLOBALVARS();
 
 std::function<bool(CCSPlayerController*)> IBaseMenu::s_canSelect =

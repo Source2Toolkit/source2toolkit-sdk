@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ECSTRIKE15USERMESSAGES_H
 #define _INCLUDE_ECSTRIKE15USERMESSAGES_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

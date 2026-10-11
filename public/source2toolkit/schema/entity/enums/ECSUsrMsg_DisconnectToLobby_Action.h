@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ECSUSRMSG_DISCONNECTTOLOBBY_ACTION_H
 #define _INCLUDE_ECSUSRMSG_DISCONNECTTOLOBBY_ACTION_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

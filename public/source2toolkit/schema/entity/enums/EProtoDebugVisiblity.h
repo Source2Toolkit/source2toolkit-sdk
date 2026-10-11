@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_EPROTODEBUGVISIBLITY_H
 #define _INCLUDE_EPROTODEBUGVISIBLITY_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

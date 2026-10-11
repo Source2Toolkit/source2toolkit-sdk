@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_EHITGROUP_H
 #define _INCLUDE_EHITGROUP_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

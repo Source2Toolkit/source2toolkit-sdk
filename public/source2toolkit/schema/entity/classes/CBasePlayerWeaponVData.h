@@ -36,26 +36,28 @@
 
 #ifndef _INCLUDE_CBASEPLAYERWEAPONVDATA_H
 #define _INCLUDE_CBASEPLAYERWEAPONVDATA_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "../enums/RumbleEffect_t.h"
+#include "CEntitySubclassVDataBase.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "shareddefs.h"
-#include "CEntitySubclassVDataBase.h"
-#include "../enums/RumbleEffect_t.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <shareddefs.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBasePlayerWeaponVData : public CEntitySubclassVDataBase
 {

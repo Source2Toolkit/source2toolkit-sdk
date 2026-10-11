@@ -36,21 +36,24 @@
 
 #ifndef _INCLUDE_AUDIOPARAMS_T_H
 #define _INCLUDE_AUDIOPARAMS_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
 #include <cstdint>
 
 class audioparams_t

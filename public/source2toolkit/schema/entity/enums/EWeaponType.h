@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_EWEAPONTYPE_H
 #define _INCLUDE_EWEAPONTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

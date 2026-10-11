@@ -33,10 +33,17 @@
  *
  * Project: Source2Toolkit
  */
+
+#ifndef _INCLUDE_RECIPIENTFILTER_H
+#define _INCLUDE_RECIPIENTFILTER_H
+#ifdef _WIN32
 #pragma once
+#endif
+
+#include <irecipientfilter.h>
+#include <playerslot.h>
+
 #include <cstdint>
-#include "irecipientfilter.h"
-#include "playerslot.h"
 
 // The game's own CRecipientFilter, member for member (libserver.so: ctor,
 // CopyFrom, Reset and the four IRecipientFilter getters read these offsets).
@@ -171,3 +178,5 @@ public:
         AddRecipient(nRecipientSlot);
     }
 };
+
+#endif // _INCLUDE_RECIPIENTFILTER_H

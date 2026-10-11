@@ -36,25 +36,27 @@
 
 #ifndef _INCLUDE_CCSPLAYER_BUYSERVICES_H
 #define _INCLUDE_CCSPLAYER_BUYSERVICES_H
-
+#ifdef _WIN32
 #pragma once
-
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
+#endif
 
 #include "CPlayerPawnComponent.h"
 #include "SellbackPurchaseEntry_t.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSPlayer_BuyServices : public CPlayerPawnComponent
 {

@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_PREFETCHTYPE_H
 #define _INCLUDE_PREFETCHTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

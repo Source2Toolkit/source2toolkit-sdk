@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -34,14 +34,12 @@
  * Project: Source2Toolkit
  */
 
-
 #include "source2toolkit/schema/entity/classes/CCSPlayerPawnBase.h"
-
-#include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
 
 #include "source2toolkit/IToolkitAddresses.h"
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
 TOOLKIT_GLOBALVARS();
 
 CCSPlayerController* CCSPlayerPawnBase::GetOriginalController()

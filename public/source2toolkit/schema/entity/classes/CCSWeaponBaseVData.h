@@ -36,31 +36,33 @@
 
 #ifndef _INCLUDE_CCSWEAPONBASEVDATA_H
 #define _INCLUDE_CCSWEAPONBASEVDATA_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
-
-#include "CBasePlayerWeaponVData.h"
-#include "CFiringModeFloat.h"
-#include "CFiringModeInt.h"
 #include "../enums/CSWeaponCategory.h"
 #include "../enums/CSWeaponSilencerType.h"
 #include "../enums/CSWeaponType.h"
 #include "../enums/gear_slot_t.h"
 #include "../enums/loadout_slot_t.h"
+#include "CBasePlayerWeaponVData.h"
+#include "CFiringModeFloat.h"
+#include "CFiringModeInt.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSWeaponBase;
 

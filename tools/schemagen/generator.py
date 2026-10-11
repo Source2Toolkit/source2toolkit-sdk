@@ -382,11 +382,12 @@ HARD_SKIP_CLASSES: frozenset[str] = frozenset({
 })
 
 HARD_SKIP_ENUMS: frozenset[str] = frozenset({
-    # hl2sdk declares these unscoped (shareddefs.h / const.h). Emitting scoped
+    # s2sdk declares these unscoped (shareddefs.h / const.h). Emitting scoped
     # versions here makes any translation unit that reaches both fail to compile,
     # so the game's own definitions are used instead -- see SKIPPED_ENUM_HEADERS.
     "Class_T",
     "DamageTypes_t",
+    "TakeDamageFlags_t",
     "EntityDissolveType_t",
     "EntityEffects_t",
     "ItemFlagTypes_t",
@@ -417,6 +418,7 @@ SKIPPED_ENUM_HEADERS: dict[str, str] = {
     "EntityEffects_t": "const.h",
     "ItemFlagTypes_t": "shareddefs.h",
     "ObserverMode_t": "shareddefs.h",
+    "TakeDamageFlags_t": "shareddefs.h",
 }
 
 NETWORK_CLASSES: list[str] = [
@@ -967,6 +969,36 @@ def make_header_guard(name: str) -> str:
     safe = sanitise_type_name(name).replace("<", "").replace(">", "").replace(" ", "_")
     return f"_INCLUDE_{safe.upper()}_H"
 
+def header_guard_open(guard: str) -> list[str]:
+    """Opening lines of a header: include guard, plus #pragma once for MSVC only."""
+    return [
+        f"#ifndef {guard}",
+        f"#define {guard}",
+        "#ifdef _WIN32",
+        "#pragma once",
+        "#endif",
+        "",
+    ]
+
+def header_guard_close(guard: str) -> list[str]:
+    return [f"#endif // {guard}", ""]
+
+def format_includes(own: set[str], external: set[str], std: set[str]) -> list[str]:
+    """
+    Include block in the project's order: own/project "..." headers, then
+    external <...> (SDK) headers, then <...> standard library headers. Groups
+    are separated by a blank line, sorted case-insensitively within, and the
+    block ends with a blank line. Entries are bare paths, without quotes or
+    angle brackets.
+    """
+    lines: list[str] = []
+    for group, fmt in ((own, '#include "{}"'), (external, "#include <{}>"), (std, "#include <{}>")):
+        if not group:
+            continue
+        lines += [fmt.format(inc) for inc in sorted(group, key=lambda s: (s.lower(), s))]
+        lines.append("")
+    return lines
+
 def _enum_type_cpp(align: int, items: list[SchemaEnumItem]) -> str:
     is_signed = any(it.value < 0 for it in items)
     table = {
@@ -984,14 +1016,9 @@ def _enum_type_cpp(align: int, items: list[SchemaEnumItem]) -> str:
 def write_enum(enum_name: str, schema_enum: SchemaEnum) -> str:
     underlying = _enum_type_cpp(schema_enum.align, schema_enum.items)
     guard = make_header_guard(enum_name)
-    lines = [
-        f"#ifndef {guard}",
-        f"#define {guard}",
-        "",
-        "#pragma once",
-        "",
-        "#include <cstdint>",
-        "",
+    lines = header_guard_open(guard)
+    lines += format_includes(set(), set(), {"cstdint"})
+    lines += [
         f"enum class {enum_name} : {underlying}",
         "{",
     ]
@@ -999,8 +1026,7 @@ def write_enum(enum_name: str, schema_enum: SchemaEnum) -> str:
         lines.append(f"    {item.name} = {item.value},")
     lines.append("};")
     lines.append("")
-    lines.append(f"#endif // {guard}")
-    lines.append("")
+    lines += header_guard_close(guard)
     return LICENSE_HEADER + "\n".join(lines)
 
 def collect_referenced_types(
@@ -1097,44 +1123,41 @@ def write_class(
     inherits = class_name == "CBaseEntity" or inherits_from_base_entity(class_name, all_classes)
 
     guard = make_header_guard(class_name)
-    lines = [
-        f"#ifndef {guard}",
-        f"#define {guard}",
-        "",
-        "#pragma once",
-        "",
-    ]
+    lines = header_guard_open(guard)
+
+    # Own/project headers ("..."): generated siblings and the toolkit's own.
+    own_includes: set[str] = {
+        "source2toolkit/IToolkitPlugin.h",
+        "source2toolkit/schema/entityio.h",
+        "source2toolkit/schema/schema.h",
+    }
+    # External SDK headers (<...>).
+    external_includes: set[str] = {
+        "ehandle.h",
+        "entityhandle.h",
+        "igameevents.h",
+        "utlbinaryblock.h",
+        "utlstring.h",
+        "utlstringtoken.h",
+        "utlsymbol.h",
+        "utlsymbollarge.h",
+        "vector.h",
+    }
+    std_includes: set[str] = {"cstdint"}
 
     if inherits and class_name != "CBaseEntity":
-        lines.append('#include "CBaseEntity.h"')
+        own_includes.add("CBaseEntity.h")
 
-    lines += [
-        '#include "igameevents.h"',
-        '#include "ehandle.h"',
-        '#include "entityhandle.h"',
-        '#include "vector.h"',
-        '#include "utlbinaryblock.h"',
-        '#include "utlsymbol.h"',
-        '#include "utlsymbollarge.h"',
-        '#include "utlstring.h"',
-        '#include "utlstringtoken.h"',
-        '#include "source2toolkit/IToolkitPlugin.h"',
-        '#include "source2toolkit/schema/entityio.h"',
-        '#include "source2toolkit/schema/schema.h"',
-        "#include <cstdint>",
-        "",
-    ]
-
-    for inc in sorted(includes):
+    for inc in includes:
         if inc.startswith("#"):
-            lines.append(f'#include "{inc[1:]}"')
+            # Raw SDK header declaring a hard-skipped enum (SKIPPED_ENUM_HEADERS).
+            external_includes.add(inc[1:])
         elif inc in all_enums and inc not in HARD_SKIP_ENUMS:
-            lines.append(f'#include "../enums/{sanitise_type_name(inc)}.h"')
+            own_includes.add(f"../enums/{sanitise_type_name(inc)}.h")
         elif inc in all_classes:
-            lines.append(f'#include "{sanitise_type_name(inc)}.h"')
+            own_includes.add(f"{sanitise_type_name(inc)}.h")
 
-    if includes:
-        lines.append("")
+    lines += format_includes(own_includes, external_includes, std_includes)
 
     for fwd in sorted(set(forwards) | set(MANUAL_FORWARDS.get(class_name, []))):
         lines.append(f"class {fwd};")
@@ -1211,8 +1234,7 @@ def write_class(
 
     lines.append("};")
     lines.append("")
-    lines.append(f"#endif // {guard}")
-    lines.append("")
+    lines += header_guard_close(guard)
     return LICENSE_HEADER + "\n".join(lines)
 
 # ---------------------------------------------------------------------------

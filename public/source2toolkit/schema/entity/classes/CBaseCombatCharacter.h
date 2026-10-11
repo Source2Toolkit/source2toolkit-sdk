@@ -36,28 +36,30 @@
 
 #ifndef _INCLUDE_CBASECOMBATCHARACTER_H
 #define _INCLUDE_CBASECOMBATCHARACTER_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/Hull_t.h"
+#include "CBaseAnimGraph.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CMovementStatsProperty.h"
+#include "RelationshipOverride_t.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CBaseAnimGraph.h"
-#include "CMovementStatsProperty.h"
-#include "../enums/Hull_t.h"
-#include "RelationshipOverride_t.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CEconWearable;
 

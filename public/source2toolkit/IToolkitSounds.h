@@ -64,8 +64,8 @@
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
-#include "mathlib/vector.h"
-#include "playerslot.h"
+#include <mathlib/vector.h>
+#include <playerslot.h>
 
 #include <cstdint>
 #include <functional>

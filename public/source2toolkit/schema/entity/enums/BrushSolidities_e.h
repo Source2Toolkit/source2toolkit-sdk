@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_BRUSHSOLIDITIES_E_H
 #define _INCLUDE_BRUSHSOLIDITIES_E_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

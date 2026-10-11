@@ -36,27 +36,29 @@
 
 #ifndef _INCLUDE_CFUNCTRACKTRAIN_H
 #define _INCLUDE_CFUNCTRACKTRAIN_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/TrainOrientationType_t.h"
+#include "../enums/TrainVelocityType_t.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CBaseModelEntity.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CBaseModelEntity.h"
-#include "../enums/TrainOrientationType_t.h"
-#include "../enums/TrainVelocityType_t.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CPathTrack;
 

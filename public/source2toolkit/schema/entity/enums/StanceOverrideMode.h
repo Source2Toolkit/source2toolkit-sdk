@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_STANCEOVERRIDEMODE_H
 #define _INCLUDE_STANCEOVERRIDEMODE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

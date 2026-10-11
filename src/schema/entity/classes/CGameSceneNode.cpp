@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,13 +36,12 @@
 
 #include "source2toolkit/schema/entity/classes/CGameSceneNode.h"
 
+#include "source2toolkit/IToolkitAddresses.h"
+#include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitGameConfig.h"
+#include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entity/classes/CSkeletonInstance.h"
 #include "source2toolkit/utils/virtual.h"
-
-#include "source2toolkit/IToolkitAddresses.h"
-#include "source2toolkit/IToolkitGameConfig.h"
-#include "source2toolkit/IToolkitApi.h"
-#include "source2toolkit/IToolkitPlugin.h"
 TOOLKIT_GLOBALVARS();
 
 CSkeletonInstance* CGameSceneNode::GetSkeletonInstance()

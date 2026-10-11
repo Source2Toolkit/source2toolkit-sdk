@@ -48,14 +48,15 @@
 #define _INCLUDE_ITOOLKIT_TYPES_H
 
 #pragma once
+#include "IToolkitKHook.h"
+
+#include <khook.hpp>
+
 #include <cstdint>
 #include <cstring>
 #include <functional>
 #include <type_traits>
 #include <utility>
-
-#include "khook.hpp"
-#include "IToolkitKHook.h"
 
 /// A plugin's id; the core hands it to Load().
 using PluginId = int;

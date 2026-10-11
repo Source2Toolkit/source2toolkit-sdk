@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_NAVDIRTYPE_H
 #define _INCLUDE_NAVDIRTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

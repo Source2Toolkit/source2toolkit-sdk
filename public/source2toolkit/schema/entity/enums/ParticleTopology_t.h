@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_PARTICLETOPOLOGY_T_H
 #define _INCLUDE_PARTICLETOPOLOGY_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

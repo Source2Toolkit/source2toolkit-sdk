@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_PREVIEWCHARACTERMODE_H
 #define _INCLUDE_PREVIEWCHARACTERMODE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_CNMTARGETWARPNODE__TARGETUPDATERULE_T_H
 #define _INCLUDE_CNMTARGETWARPNODE__TARGETUPDATERULE_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

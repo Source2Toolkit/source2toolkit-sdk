@@ -72,7 +72,7 @@
 #pragma once
 #include "IToolkitPlugin.h"
 
-#include "entityhandle.h"
+#include <entityhandle.h>
 
 #include <functional>
 

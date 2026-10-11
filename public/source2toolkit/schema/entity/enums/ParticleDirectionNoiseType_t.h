@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_PARTICLEDIRECTIONNOISETYPE_T_H
 #define _INCLUDE_PARTICLEDIRECTIONNOISETYPE_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

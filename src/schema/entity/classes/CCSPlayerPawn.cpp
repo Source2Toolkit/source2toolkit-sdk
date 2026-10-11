@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -33,7 +33,6 @@
  *
  * Project: Source2Toolkit
  */
-
 
 #include "source2toolkit/schema/entity/classes/CCSPlayerPawn.h"
 

@@ -36,25 +36,27 @@
 
 #ifndef _INCLUDE_CTONEMAPCONTROLLER2ALIAS_ENV_TONEMAP_CONTROLLER2_H
 #define _INCLUDE_CTONEMAPCONTROLLER2ALIAS_ENV_TONEMAP_CONTROLLER2_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CTonemapController2.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CTonemapController2.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CTonemapController2Alias_env_tonemap_controller2 : public CTonemapController2
 {

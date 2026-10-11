@@ -1,17 +1,18 @@
-﻿//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
 // Purpose: CCSNavArea -- see the layout note in schema/navarea.h.
 //
-//=============================================================================//
+//=============================================================================
+
 #include "source2toolkit/schema/navarea.h"
+
+#include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitGameConfig.h"
+#include "source2toolkit/IToolkitPlugin.h"
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
-
-#include "source2toolkit/IToolkitGameConfig.h"
-#include "source2toolkit/IToolkitApi.h"
-#include "source2toolkit/IToolkitPlugin.h"
 TOOLKIT_GLOBALVARS();
 
 // The includes above drag in windows.h, whose min/max macros would eat every

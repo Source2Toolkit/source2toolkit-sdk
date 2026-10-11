@@ -47,8 +47,8 @@
 #define _INCLUDE_ITOOLKIT_MEMORY_H
 
 #pragma once
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 
 class IToolkitMemory

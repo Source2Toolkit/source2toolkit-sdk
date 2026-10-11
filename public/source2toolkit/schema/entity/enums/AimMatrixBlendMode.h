@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_AIMMATRIXBLENDMODE_H
 #define _INCLUDE_AIMMATRIXBLENDMODE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

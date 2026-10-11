@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,15 +36,14 @@
 
 #include "source2toolkit/schema/entity/classes/CCSGameRules.h"
 
+#include "source2toolkit/IToolkitAddresses.h"
+#include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitEntities.h"
+#include "source2toolkit/IToolkitGameConfig.h"
+#include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
 #include "source2toolkit/schema/entity/classes/CCSPlayerPawn.h"
 #include "source2toolkit/utils/virtual.h"
-
-#include "source2toolkit/IToolkitAddresses.h"
-#include "source2toolkit/IToolkitEntities.h"
-#include "source2toolkit/IToolkitGameConfig.h"
-#include "source2toolkit/IToolkitApi.h"
-#include "source2toolkit/IToolkitPlugin.h"
 TOOLKIT_GLOBALVARS();
 
 void CCSGameRules::TerminateRound(float flDelay, int32_t eRoundEndReason, uint32 nTeamId, HookChain eChain)

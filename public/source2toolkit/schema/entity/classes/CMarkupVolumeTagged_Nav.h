@@ -36,26 +36,28 @@
 
 #ifndef _INCLUDE_CMARKUPVOLUMETAGGED_NAV_H
 #define _INCLUDE_CMARKUPVOLUMETAGGED_NAV_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/NavScopeFlags_t.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CMarkupVolumeTagged.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CMarkupVolumeTagged.h"
-#include "../enums/NavScopeFlags_t.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CMarkupVolumeTagged_Nav : public CMarkupVolumeTagged
 {

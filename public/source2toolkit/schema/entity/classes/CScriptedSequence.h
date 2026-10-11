@@ -36,31 +36,32 @@
 
 #ifndef _INCLUDE_CSCRIPTEDSEQUENCE_H
 #define _INCLUDE_CSCRIPTEDSEQUENCE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
-
-#include "CBaseEntity.h"
 #include "../enums/ForcedCrouchState_t.h"
 #include "../enums/ScriptedConflictResponse_t.h"
 #include "../enums/ScriptedHeldWeaponBehavior_t.h"
 #include "../enums/ScriptedMoveTo_t.h"
 #include "../enums/ScriptedOnDeath_t.h"
 #include "../enums/SharedMovementGait_t.h"
+#include "CBaseEntity.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBaseAnimGraph;
 

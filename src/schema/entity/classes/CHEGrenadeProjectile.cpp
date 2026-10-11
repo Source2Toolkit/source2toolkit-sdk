@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,12 +36,11 @@
 
 #include "source2toolkit/schema/entity/classes/CHEGrenadeProjectile.h"
 
-#include "source2toolkit/schema/entity/classes/CBaseEntity.h"
-
 #include "source2toolkit/IToolkitAddresses.h"
-#include "source2toolkit/IToolkitGameConfig.h"
 #include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitGameConfig.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entity/classes/CBaseEntity.h"
 TOOLKIT_GLOBALVARS();
 
 CHEGrenadeProjectile* CHEGrenadeProjectile::EmitGrenade(const Vector& vecPosition, const QAngle& angAngle, const Vector& vecVelocity,

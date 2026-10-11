@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,12 +36,13 @@
 
 #ifndef _INCLUDE_HUDPANELHASCLASS_T_H
 #define _INCLUDE_HUDPANELHASCLASS_T_H
-
+#ifdef _WIN32
 #pragma once
-
-#include "platform.h"
+#endif
 
 #include "../enums/EHudPanelClassStatus_t.h"
+
+#include <platform.h>
 
 /**
  * @brief One "panel has CSS class" entry of a custom HUD layout state.

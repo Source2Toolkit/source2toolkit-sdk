@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_IKTARGETTYPE_H
 #define _INCLUDE_IKTARGETTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

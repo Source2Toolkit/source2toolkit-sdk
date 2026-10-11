@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_TOGGLE_STATE_H
 #define _INCLUDE_TOGGLE_STATE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

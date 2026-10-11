@@ -45,9 +45,9 @@
 
 #pragma once
 
-#include <cstdint>
+#include <khook.hpp>
 
-#include "khook.hpp"
+#include <cstdint>
 
 namespace ToolkitKHook
 {

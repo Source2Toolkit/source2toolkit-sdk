@@ -36,27 +36,29 @@
 
 #ifndef _INCLUDE_CCSPLAYER_MOVEMENTSERVICES_H
 #define _INCLUDE_CCSPLAYER_MOVEMENTSERVICES_H
-
+#ifdef _WIN32
 #pragma once
-
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
+#endif
 
 #include "CCSPlayerAnimationState.h"
 #include "CCSPlayerLegacyJump.h"
 #include "CCSPlayerModernJump.h"
 #include "CPlayer_MovementServices_Humanoid.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSPlayer_MovementServices : public CPlayer_MovementServices_Humanoid
 {

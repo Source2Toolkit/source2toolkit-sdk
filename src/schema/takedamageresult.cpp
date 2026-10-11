@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -34,13 +34,13 @@
  * Project: Source2Toolkit
  */
 
+#include "source2toolkit/schema/takedamageresult.h"
+
 #include "source2toolkit/IToolkitAddresses.h"
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitGameConfig.h"
 #include "source2toolkit/IToolkitPlugin.h"
-
 #include "source2toolkit/schema/takedamageinfo.h"
-#include "source2toolkit/schema/takedamageresult.h"
 
 void CTakeDamageResult::CopyFrom(CTakeDamageInfo* pInfo)
 {

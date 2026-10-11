@@ -34,6 +34,12 @@
  * Project: Source2Toolkit
  */
 
+#ifndef ENTITYIO_H
+#define ENTITYIO_H
+#ifdef _WIN32
+#pragma once
+#endif
+
 /**
 
 * @file entityio.h
@@ -47,10 +53,8 @@
 * @note Equivalent to Hammer I/O system (FireOutput / AcceptInput).
 */
 
-#ifndef ENTITYIO_H
-#define ENTITYIO_H
 
-#pragma once
+
 
 #ifndef NULL
 #define NULL 0

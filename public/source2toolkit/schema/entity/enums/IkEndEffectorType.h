@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_IKENDEFFECTORTYPE_H
 #define _INCLUDE_IKENDEFFECTORTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

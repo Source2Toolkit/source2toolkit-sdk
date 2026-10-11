@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_DIALOG_TYPE_H
 #define _INCLUDE_DIALOG_TYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

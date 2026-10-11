@@ -36,24 +36,26 @@
 
 #ifndef _INCLUDE_CCSGAMEMODERULES_DEATHMATCH_H
 #define _INCLUDE_CCSGAMEMODERULES_DEATHMATCH_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CCSGameModeRules.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CCSGameModeRules.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSGameModeRules_Deathmatch : public CCSGameModeRules
 {

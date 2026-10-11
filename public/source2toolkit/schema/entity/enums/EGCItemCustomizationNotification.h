@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_EGCITEMCUSTOMIZATIONNOTIFICATION_H
 #define _INCLUDE_EGCITEMCUSTOMIZATIONNOTIFICATION_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

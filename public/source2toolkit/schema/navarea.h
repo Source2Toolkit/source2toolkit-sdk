@@ -1,17 +1,19 @@
-﻿//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
 // Purpose: The CS2 nav mesh area.
 //
-//=============================================================================//
-#pragma once
+//=============================================================================
 
 #ifndef NAVAREA_H
 #define NAVAREA_H
+#ifdef _WIN32
+#pragma once
+#endif
+
+#include <mathlib/vector.h>
 
 #include <cstdint>
 #include <vector>
-
-#include "mathlib/vector.h"
 
 // CS2 rewrote the nav mesh, so hl2sdk's game/server/nav_area.h -- which is
 // Source 1 code and describes a CNavArea starting with m_nwCorner at offset 0

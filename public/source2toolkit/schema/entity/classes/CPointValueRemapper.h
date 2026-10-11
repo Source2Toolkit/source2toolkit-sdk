@@ -36,30 +36,31 @@
 
 #ifndef _INCLUDE_CPOINTVALUEREMAPPER_H
 #define _INCLUDE_CPOINTVALUEREMAPPER_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
-
-#include "CBaseEntity.h"
 #include "../enums/ValueRemapperHapticsType_t.h"
 #include "../enums/ValueRemapperInputType_t.h"
 #include "../enums/ValueRemapperMomentumType_t.h"
 #include "../enums/ValueRemapperOutputType_t.h"
 #include "../enums/ValueRemapperRatchetType_t.h"
+#include "CBaseEntity.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBasePlayerPawn;
 

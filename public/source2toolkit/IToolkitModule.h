@@ -49,6 +49,7 @@
 
 #pragma once
 #include "IToolkitMemory.h"
+
 #include <cstddef>
 #include <cstdint>
 

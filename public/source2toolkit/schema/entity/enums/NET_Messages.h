@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_NET_MESSAGES_H
 #define _INCLUDE_NET_MESSAGES_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

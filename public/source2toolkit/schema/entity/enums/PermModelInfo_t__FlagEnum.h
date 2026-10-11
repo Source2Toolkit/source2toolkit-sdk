@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_PERMMODELINFO_T__FLAGENUM_H
 #define _INCLUDE_PERMMODELINFO_T__FLAGENUM_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

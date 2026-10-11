@@ -1,11 +1,11 @@
-﻿//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
 // Purpose: CTraceFilterEx, out of line because of the include cycle noted in
 //          IToolkitTrace.h.
 //
-//=============================================================================//
-#include "source2toolkit/IToolkitTrace.h"
+//=============================================================================
 
+#include "source2toolkit/IToolkitTrace.h"
 #include "source2toolkit/schema/entity/classes/CBaseEntity.h"
 #include "source2toolkit/schema/entity/classes/CCollisionProperty.h"
 

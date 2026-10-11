@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ECSPREDICTIONEVENTS_H
 #define _INCLUDE_ECSPREDICTIONEVENTS_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

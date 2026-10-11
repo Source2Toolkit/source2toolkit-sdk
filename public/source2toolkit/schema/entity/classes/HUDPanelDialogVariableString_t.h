@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,11 +36,12 @@
 
 #ifndef _INCLUDE_HUDPANELDIALOGVARIABLESTRING_T_H
 #define _INCLUDE_HUDPANELDIALOGVARIABLESTRING_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "platform.h"
-#include "utlstring.h"
+#include <platform.h>
+#include <utlstring.h>
 
 /**
  * @brief One dialog-variable string of a custom HUD layout state.

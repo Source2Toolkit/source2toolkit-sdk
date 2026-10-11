@@ -36,24 +36,26 @@
 
 #ifndef _INCLUDE_CEXAMPLESCHEMAVDATA_POLYMORPHICDERIVEDB_H
 #define _INCLUDE_CEXAMPLESCHEMAVDATA_POLYMORPHICDERIVEDB_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CExampleSchemaVData_PolymorphicBase.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CExampleSchemaVData_PolymorphicBase.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CExampleSchemaVData_PolymorphicDerivedB : public CExampleSchemaVData_PolymorphicBase
 {

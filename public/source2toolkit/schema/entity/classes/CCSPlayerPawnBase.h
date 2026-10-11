@@ -36,27 +36,29 @@
 
 #ifndef _INCLUDE_CCSPLAYERPAWNBASE_H
 #define _INCLUDE_CCSPLAYERPAWNBASE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/CSPlayerState.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CBasePlayerPawn.h"
+#include "CTouchExpansionComponent.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CBasePlayerPawn.h"
-#include "../enums/CSPlayerState.h"
-#include "CTouchExpansionComponent.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSPlayerController;
 class CCSPlayer_PingServices;

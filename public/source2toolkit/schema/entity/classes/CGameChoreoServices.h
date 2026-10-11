@@ -36,26 +36,28 @@
 
 #ifndef _INCLUDE_CGAMECHOREOSERVICES_H
 #define _INCLUDE_CGAMECHOREOSERVICES_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "../enums/IChoreoServices__ChoreoState_t.h"
+#include "../enums/IChoreoServices__ScriptState_t.h"
+#include "IChoreoServices.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "IChoreoServices.h"
-#include "../enums/IChoreoServices__ChoreoState_t.h"
-#include "../enums/IChoreoServices__ScriptState_t.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBaseModelEntity;
 class CScriptedSequence;

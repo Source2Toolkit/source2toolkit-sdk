@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ESOURCE2PLAYSTATSFIELDTYPE_H
 #define _INCLUDE_ESOURCE2PLAYSTATSFIELDTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

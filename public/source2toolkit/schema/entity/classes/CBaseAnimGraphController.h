@@ -36,32 +36,34 @@
 
 #ifndef _INCLUDE_CBASEANIMGRAPHCONTROLLER_H
 #define _INCLUDE_CBASEANIMGRAPHCONTROLLER_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
-
-#include "AnimGraph2SerializedPoseRecipeSlot_t.h"
-#include "../enums/AnimLoopMode_t.h"
 #include "../enums/AnimationAlgorithm_t.h"
+#include "../enums/AnimLoopMode_t.h"
+#include "../enums/SequenceFinishNotifyState_t.h"
+#include "AnimGraph2SerializedPoseRecipeSlot_t.h"
 #include "CAnimGraph2InstancePtr.h"
 #include "CExternalAnimGraphList.h"
 #include "CSkeletonAnimationController.h"
 #include "ExternalAnimGraphHandle_t.h"
 #include "ResourceId_t.h"
-#include "../enums/SequenceFinishNotifyState_t.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBaseAnimGraph;
 class InfoForResourceTypeCNmGraphDefinition;

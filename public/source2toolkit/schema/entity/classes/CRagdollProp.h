@@ -36,28 +36,30 @@
 
 #ifndef _INCLUDE_CRAGDOLLPROP_H
 #define _INCLUDE_CRAGDOLLPROP_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/INavObstacle__NavObstacleType_t.h"
+#include "CBaseAnimGraph.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CPropDataComponent.h"
+#include "ragdoll_t.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CBaseAnimGraph.h"
-#include "CPropDataComponent.h"
-#include "../enums/INavObstacle__NavObstacleType_t.h"
-#include "ragdoll_t.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CBaseEntity;
 class CBasePlayerPawn;

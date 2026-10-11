@@ -58,7 +58,7 @@
 #pragma once
 #include "IToolkitPlugin.h"
 
-#include "igamesystemfactory.h"
+#include <igamesystemfactory.h>
 
 /* =========================
 Core Toolkit Game Systems

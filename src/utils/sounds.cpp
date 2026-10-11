@@ -34,10 +34,9 @@
  * Project: Source2Toolkit
  */
 
-#include "source2toolkit/IToolkitSounds.h"
-
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/IToolkitSounds.h"
 TOOLKIT_GLOBALVARS();
 
 IToolkitSound* IToolkitSound::New(const char* name)

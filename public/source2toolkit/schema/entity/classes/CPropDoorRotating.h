@@ -36,28 +36,30 @@
 
 #ifndef _INCLUDE_CPROPDOORROTATING_H
 #define _INCLUDE_CPROPDOORROTATING_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
+#include "../enums/doorCheck_e.h"
+#include "../enums/PropDoorRotatingOpenDirection_e.h"
+#include "../enums/PropDoorRotatingSpawnPos_t.h"
 #include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
+#include "CBasePropDoor.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
-#include <cstdint>
 
-#include "CBasePropDoor.h"
-#include "../enums/PropDoorRotatingOpenDirection_e.h"
-#include "../enums/PropDoorRotatingSpawnPos_t.h"
-#include "../enums/doorCheck_e.h"
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CEntityBlocker;
 

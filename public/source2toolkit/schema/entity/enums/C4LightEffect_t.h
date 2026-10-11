@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_C4LIGHTEFFECT_T_H
 #define _INCLUDE_C4LIGHTEFFECT_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

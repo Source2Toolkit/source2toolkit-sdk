@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_WEAPONSWITCHREASON_T_H
 #define _INCLUDE_WEAPONSWITCHREASON_T_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

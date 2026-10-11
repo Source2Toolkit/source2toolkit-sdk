@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_SVC_MESSAGES_LOWFREQUENCY_H
 #define _INCLUDE_SVC_MESSAGES_LOWFREQUENCY_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

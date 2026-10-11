@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ANIMVALUESOURCE_H
 #define _INCLUDE_ANIMVALUESOURCE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

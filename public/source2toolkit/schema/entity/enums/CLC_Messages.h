@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_CLC_MESSAGES_H
 #define _INCLUDE_CLC_MESSAGES_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 

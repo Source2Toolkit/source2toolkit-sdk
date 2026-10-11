@@ -36,8 +36,9 @@
 
 #ifndef _INCLUDE_ESPLINEPUSHTYPE_H
 #define _INCLUDE_ESPLINEPUSHTYPE_H
-
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include <cstdint>
 
