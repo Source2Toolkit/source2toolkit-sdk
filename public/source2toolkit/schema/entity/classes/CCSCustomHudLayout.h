@@ -36,26 +36,27 @@
 
 #ifndef _INCLUDE_CCSCUSTOMHUDLAYOUT_H
 #define _INCLUDE_CCSCUSTOMHUDLAYOUT_H
-
+#ifdef _WIN32
 #pragma once
-
-#include "CBaseEntity.h"
-#include "igameevents.h"
-#include "ehandle.h"
-#include "entityhandle.h"
-#include "vector.h"
-#include "utlbinaryblock.h"
-#include "utlsymbol.h"
-#include "utlsymbollarge.h"
-#include "utlstring.h"
-#include "utlstringtoken.h"
-#include "source2toolkit/IToolkitPlugin.h"
-#include "source2toolkit/schema/entityio.h"
-#include "source2toolkit/schema/schema.h"
-#include <cstdint>
+#endif
 
 #include "CBaseEntity.h"
 #include "CCSCustomHudLayoutState.h"
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
+#include <cstdint>
 
 class CCSPlayerController;
 
@@ -89,6 +90,9 @@ public:
     void HookClick(std::function<void(CCSPlayerController*, CCSCustomHudLayout*, const char*)> callback);
     /// <summary>Drops every click callback registered for this layout.</summary>
     void UnhookClicks();
+
+private:
+    void StateChanged(CCSPlayerController* pController);
 
 public:
     static CCSCustomHudLayout* New(const char* className)

@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,15 +36,14 @@
 
 #include "source2toolkit/schema/entity/classes/CCSCustomHudLayout.h"
 
-#include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
-
-#include "entitykeyvalues.h"
-
-#include <string>
-
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitCustomHud.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
+
+#include <entitykeyvalues.h>
+
+#include <string>
 TOOLKIT_GLOBALVARS();
 
 namespace
@@ -56,13 +55,20 @@ namespace
 
     /// Index of a string in one of the layout's string tables, appending it if
     /// it is not there yet. The per-player states store these indices, not the
-    /// strings themselves.
-    int InternString(CUtlVector<CUtlString>& vecTable, const char* pszValue)
+    /// strings themselves, so a new string has to reach the clients with them:
+    /// without the table's own state change a client gets a state pointing past
+    /// the end of its copy of the table.
+    template <typename Field>
+    int InternString(Field& field, const char* pszValue)
     {
+        CUtlVector<CUtlString>& vecTable = field();
         int index = vecTable.Find(pszValue);
 
         if (index == -1)
+        {
             index = vecTable.AddToTail(pszValue);
+            field.NetworkStateChanged();
+        }
 
         return index;
     }
@@ -88,6 +94,16 @@ CCSCustomHudLayout* CCSCustomHudLayout::Create(const char* pszLayout, const char
 
     pLayout->DispatchSpawn(pKeyValues);
     return pLayout;
+}
+
+// A player's state is an element of m_vecPlayerLayoutStates, embedded without a NetworkVar of its own: the
+// state change its fields raise finds no slot and goes nowhere, so the entity's field carries it.
+void CCSCustomHudLayout::StateChanged(CCSPlayerController* pController)
+{
+    if (pController)
+        m_vecPlayerLayoutStates.NetworkStateChanged();
+    else
+        m_globalLayoutState.NetworkStateChanged();
 }
 
 CCSCustomHudLayoutState& CCSCustomHudLayout::GetLayoutState(CCSPlayerController* pController)
@@ -117,8 +133,8 @@ void CCSCustomHudLayout::SetHasClass(const char* pszPanelId, const char* pszClas
     if (!pszPanelId || !pszClassName)
         return;
 
-    const int panelIndex = InternString(m_vecPanelIds(), pszPanelId);
-    const int classIndex = InternString(m_vecClassNames(), pszClassName);
+    const int panelIndex = InternString(m_vecPanelIds, pszPanelId);
+    const int classIndex = InternString(m_vecClassNames, pszClassName);
 
     auto& layoutState = GetLayoutState(pController);
 
@@ -132,6 +148,7 @@ void CCSCustomHudLayout::SetHasClass(const char* pszPanelId, const char* pszClas
         layoutState.m_vecHasClasses().Element(hasClassIndex).m_eClassStatus = hasClass.m_eClassStatus;
 
     layoutState.m_vecHasClasses.NetworkStateChanged();
+    StateChanged(pController);
 }
 
 void CCSCustomHudLayout::SetDialogVariableString(const char* pszPanelId, const char* pszVariableName, const char* pszValue, CCSPlayerController* pController)
@@ -139,8 +156,8 @@ void CCSCustomHudLayout::SetDialogVariableString(const char* pszPanelId, const c
     if (!pszPanelId || !pszVariableName || !pszValue)
         return;
 
-    const int panelIndex = InternString(m_vecPanelIds(), pszPanelId);
-    const int variableIndex = InternString(m_vecDialogVariableNames(), pszVariableName);
+    const int panelIndex = InternString(m_vecPanelIds, pszPanelId);
+    const int variableIndex = InternString(m_vecDialogVariableNames, pszVariableName);
 
     auto& layoutState = GetLayoutState(pController);
 
@@ -154,11 +171,13 @@ void CCSCustomHudLayout::SetDialogVariableString(const char* pszPanelId, const c
         layoutState.m_vecDialogVariableStrings().Element(dialogVariableIndex).m_sValue = pszValue;
 
     layoutState.m_vecDialogVariableStrings.NetworkStateChanged();
+    StateChanged(pController);
 }
 
 void CCSCustomHudLayout::SetInputCaptureEnabled(bool bEnable, CCSPlayerController* pController)
 {
     GetLayoutState(pController).m_bInputCaptureEnabled = bEnable;
+    StateChanged(pController);
 }
 
 bool CCSCustomHudLayout::IsInputCaptureEnabled(CCSPlayerController* pController)
