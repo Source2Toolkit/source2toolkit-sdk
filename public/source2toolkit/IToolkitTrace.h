@@ -53,12 +53,12 @@
 
 #pragma once
 #include "IToolkitPlugin.h"
-
 #include "schema/navarea.h"
 
-#include "bspflags.h"
-#include "gametrace.h"
-#include "eiface.h"
+#include <bspflags.h>
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
+#include <gametrace.h>
 
 /* =========================
 Forward declarations

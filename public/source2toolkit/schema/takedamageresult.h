@@ -1,17 +1,19 @@
-﻿//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
-// Purpose:
+// Purpose: CTakeDamageResult
 //
-//=============================================================================//
-#pragma once
+//=============================================================================
 
 #ifndef TAKEDAMAGERESULT_H
 #define TAKEDAMAGERESULT_H
+#ifdef _WIN32
+#pragma once
+#endif
 
-#include "entity/enums/TakeDamageFlags_t.h"
-
-#include "ehandle.h"
-#include "tier1/mempool.h"
+#include <ehandle.h>
+#include <gametrace.h>
+#include <shareddefs.h>
+#include <tier0/mempool.h>
 
 class CTakeDamageInfo;
 

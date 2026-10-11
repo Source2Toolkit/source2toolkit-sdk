@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -34,6 +34,12 @@
  * Project: Source2Toolkit
  */
 
+#ifndef SCHEMA_H
+#define SCHEMA_H
+#ifdef _WIN32
+#pragma once
+#endif
+
 /**
 
 * @file schema.h
@@ -48,27 +54,27 @@
 * @note This system is similar to Source2 schema/netvar access.
   */
 
-#pragma once
 
-#ifndef SCHEMA_H
-#define SCHEMA_H
 
-#include "igameevents.h"
-#include "igameeventsystem.h"
-#include "schemasystem.h"
-#include "schemasystem/schematypes.h"
-#include "entity2/entityclass.h"
-#include "entity2/entitysystem.h"
-#include "entity2/entityidentity.h"
-#include "entity2/entityinstance.h"
-#include "const.h"
-#include "utlmap.h"
-#include "tier0/dbg.h"
 
-#include <type_traits>
+#include <const.h>
+#include <engine2/gameshareddefs.h>
+#include <engine2/igameeventsystem.h>
+#include <entity2/entityclass.h>
+#include <entity2/entityidentity.h>
+#include <entity2/entityinstance.h>
+#include <entity2/entitysystem.h>
+#include <gameentitysystem.h>
+#include <igameevents.h>
+#include <schemasystem.h>
+#include <schemasystem/baseschema.h>
+#include <tier0/dbg.h>
+#include <utlmap.h>
+
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 /* =========================
 Engine interface getters

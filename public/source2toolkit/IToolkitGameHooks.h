@@ -76,15 +76,15 @@
 
 #pragma once
 
-#include <cstdint>
-#include <functional>
-
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
+#include <cstdint>
+#include <functional>
+
 // variant_t is a typedef of a template in s2sdk, so it cannot be forward
 // declared like the rest.
-#include "variant.h"
+#include "entity2/variant.h"
 
 class CBaseEntity;
 class CBasePlayerController;

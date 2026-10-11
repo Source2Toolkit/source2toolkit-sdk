@@ -52,8 +52,9 @@
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
-#include "igameevents.h"
-#include "eiface.h"
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
+#include <igameevents.h>
 
 /* =========================
 Forward declarations

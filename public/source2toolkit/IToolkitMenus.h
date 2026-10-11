@@ -53,7 +53,8 @@
 // so it must not include the plugin header back.
 #include "IToolkitTypes.h"
 
-#include "eiface.h"
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
 
 // The same alias IToolkitTypes.h declares, repeated so this header reads the
 // same whichever header of the SDK pulled it in first.

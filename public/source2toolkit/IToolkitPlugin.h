@@ -54,8 +54,10 @@
 #pragma once
 #include "interfaces/interfaces.h"
 // The engine callbacks on IToolkitListener take the engine's own types.
-#include "eiface.h"
-#include "iserver.h"
+#include "engine2/isource2server.h"
+#include "engine2/ivengineserver2.h"
+#include "engine2/networkgameserverbase.h"
+#include "engine2/inetworkserverservice.h"
 
 #include <cstddef>
 #include <cstdint>

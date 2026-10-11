@@ -52,10 +52,11 @@
 #define _INCLUDE_ITOOLKIT_API_H
 
 #pragma once
+#include "IToolkitPaths.h"
 #include "IToolkitPlugin.h"
 
-#include "eiface.h"
-#include "IToolkitPaths.h"
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
 
 /* =========================
 Windows macro collisions

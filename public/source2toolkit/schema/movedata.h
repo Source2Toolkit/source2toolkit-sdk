@@ -1,19 +1,20 @@
-﻿//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
 // Purpose: Movement data passed through CCSPlayer_MovementServices.
 //
-//=============================================================================//
-#pragma once
+//=============================================================================
 
 #ifndef MOVEDATA_H
 #define MOVEDATA_H
+#ifdef _WIN32
+#pragma once
+#endif
 
-#include "ehandle.h"
-#include "gametrace.h"
-
-#include "mathlib/vector.h"
-#include "mathlib/vector2d.h"
-#include "tier1/utlvector.h"
+#include <ehandle.h>
+#include <gametrace.h>
+#include <mathlib/vector.h>
+#include <mathlib/vector2d.h>
+#include <tier0/utlvector.h>
 
 class CCSPlayerPawn;
 

@@ -54,8 +54,9 @@
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
-#include "convar.h"
-#include "eiface.h"
+#include <convar.h>
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
 
 /* =========================
 Forward declarations

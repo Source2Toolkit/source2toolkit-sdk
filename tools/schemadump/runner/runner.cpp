@@ -16,7 +16,7 @@
 
 #include <ISmmPlugin.h>
 #include <icvar.h>
-#include <tier1/convar.h>
+#include <tier0/convar.h>
 
 #include <cstdio>
 #include <cstdlib>

@@ -49,10 +49,11 @@
 
 #pragma once
 #include "IToolkitPlugin.h"
-
-#include "igameevents.h"
-#include "eiface.h"
 #include "utils/plat.h"
+
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
+#include <igameevents.h>
 
 /* =========================
 Forward declarations

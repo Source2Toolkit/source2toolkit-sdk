@@ -63,13 +63,11 @@ REPO_BLOB = 'https://github.com/Source2Toolkit/source2toolkit-sdk/blob/main/publ
 # Titles for the hand-written schema headers (the file names are not names).
 SCHEMA_TITLES = {
     'attackerinfo': 'AttackerInfo_t',
-    'clientframe': 'Client frames',
     'entityio': 'Entity I/O',
     'movedata': 'CMoveData',
     'navarea': 'Navigation mesh',
     'netmessages': 'Net message types',
     'recipientfilter': 'Recipient filters',
-    'serversideclient': 'Server-side clients',
     'takedamageinfo': 'CTakeDamageInfo',
     'takedamageresult': 'CTakeDamageResult',
 }

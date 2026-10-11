@@ -50,7 +50,7 @@ SUBMODULE = os.path.join(VENDOR, 's2sdk')
 S2SDK_ENV = ['S2SDK_CS2', 'S2SDKCS2', 'S2SDK', 'HL2SDK_CS2', 'HL2SDKCS2']
 S2SDK_REPO = 'https://github.com/alliedmodders/s2sdk.git'
 # What has to exist for a path to count as an s2sdk checkout.
-S2SDK_PROBE = os.path.join('public', 'eiface.h')
+S2SDK_PROBE = os.path.join('public', 'tier0', 'platform.h')
 
 # KHook follows this repository's pin, read from GitHub without cloning it.
 KHOOK_TRACK = {

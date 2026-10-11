@@ -270,9 +270,9 @@ file(GLOB_RECURSE SOURCE_FILES
 
 list(APPEND SOURCE_FILES
         ${SOURCESDK}/public/tier0/memoverride.cpp
-        ${SOURCESDK}/tier1/bitbuf.cpp
-        ${SOURCESDK}/tier1/convar.cpp
-        ${SOURCESDK}/tier1/keyvalues3.cpp
+        ${SOURCESDK}/tier0_perproject/bitbuf.cpp
+        ${SOURCESDK}/tier0_perproject/convar.cpp
+        ${SOURCESDK}/tier0_perproject/keyvalues3.cpp
         ${SOURCESDK}/entity2/entityidentity.cpp
         ${SOURCESDK}/entity2/entitysystem.cpp
         ${SOURCESDK}/entity2/entitykeyvalues.cpp

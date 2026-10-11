@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -35,23 +35,24 @@
  */
 
 #include "source2toolkit/schema/schema.h"
-#include "source2toolkit/utils/virtual.h"
-#include "source2toolkit/IToolkitModule.h"
 
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitGameConfig.h"
+#include "source2toolkit/IToolkitModule.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/utils/virtual.h"
 TOOLKIT_GLOBALVARS();
 
 #include "platform.h"
 #include "edict.h"
-#include "iserver.h"
+#include "engine2/networkgameserverbase.h"
+#include "engine2/inetworkserverservice.h"
 #include "networksystem/inetworkmessages.h"
 #include "schemasystem/schemasystem.h"
 #include "entity2/entityidentity.h"
 #include "entity2/entityinstance.h"
 #include "tier0/memdbgon.h"
-#include "tier1/utlmap.h"
+#include "tier0/utlmap.h"
 #include <map>
 #include <mutex>
 #include <cstring>

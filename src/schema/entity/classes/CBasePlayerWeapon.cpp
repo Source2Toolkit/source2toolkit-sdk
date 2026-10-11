@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -36,7 +36,7 @@
 
 #include "source2toolkit/schema/entity/classes/CBasePlayerWeapon.h"
 
-#include "strtools.h"
+#include <tier0_strtools.h>
 
 CCSWeaponBaseVData* CBasePlayerWeapon::GetWeaponVData()
 {

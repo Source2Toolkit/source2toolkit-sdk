@@ -52,13 +52,15 @@
 #define _INCLUDE_ITOOLKIT_ENTITIES_H
 
 #pragma once
-#include "source2toolkit/schema/schema.h"
-#include <vector>
-#include <cstring>
 #include "IToolkitPlugin.h"
+#include "source2toolkit/schema/schema.h"
 
-#include "igameevents.h"
-#include "eiface.h"
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
+#include <igameevents.h>
+
+#include <cstring>
+#include <vector>
 
 /* =========================
 Forward declarations

@@ -55,12 +55,11 @@
 #include "IToolkitPlugin.h"
 
 #include <convar.h>
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
 
 #include <string>
 #include <type_traits>
-
-#include "convar.h"
-#include "eiface.h"
 
 /* =========================
 Forward declarations

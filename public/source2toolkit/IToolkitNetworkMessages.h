@@ -52,12 +52,13 @@
 #include "IToolkitPlugin.h"
 #include "IToolkitTypes.h"
 
-#include "mathlib/vector.h"
-#include "Color.h"
-#include "eiface.h"
+#include <color.h>
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
+#include <mathlib/vector.h>
 
-#include <functional>
 #include <cstdint>
+#include <functional>
 
 /* =========================
 Windows macro collisions

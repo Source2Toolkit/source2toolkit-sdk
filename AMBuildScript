@@ -157,7 +157,7 @@ class ToolkitSdkConfig(object):
     if env:
       return env
     vendored = os.path.join(self.sourcePath, "vendor", "s2sdk")
-    if os.path.isfile(os.path.join(vendored, "public", "eiface.h")):
+    if os.path.isfile(os.path.join(vendored, "public", "tier0", "platform.h")):
       return vendored
     return None
 
@@ -393,9 +393,9 @@ class ToolkitSdkConfig(object):
       # CMakeLists.txt. A plugin must not compile these again.
       lib.sources += [
         os.path.join(sdk['path'], 'public', 'tier0', 'memoverride.cpp'),
-        os.path.join(sdk['path'], 'tier1', 'bitbuf.cpp'),
-        os.path.join(sdk['path'], 'tier1', 'convar.cpp'),
-        os.path.join(sdk['path'], 'tier1', 'keyvalues3.cpp'),
+        os.path.join(sdk['path'], 'tier0_perproject', 'bitbuf.cpp'),
+        os.path.join(sdk['path'], 'tier0_perproject', 'convar.cpp'),
+        os.path.join(sdk['path'], 'tier0_perproject', 'keyvalues3.cpp'),
         os.path.join(sdk['path'], 'entity2', 'entityidentity.cpp'),
         os.path.join(sdk['path'], 'entity2', 'entitysystem.cpp'),
         os.path.join(sdk['path'], 'entity2', 'entitykeyvalues.cpp'),

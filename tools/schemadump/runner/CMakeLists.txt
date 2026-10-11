@@ -15,7 +15,7 @@ foreach(_var S2SDK_CS2 S2SDKCS2 S2SDK HL2SDK_CS2 HL2SDKCS2)
         break()
     endif()
 endforeach()
-if(NOT EXISTS "${HL2SDK}/public/eiface.h")
+if(NOT EXISTS "${HL2SDK}/public/tier0/platform.h")
     message(FATAL_ERROR "s2sdk not found at ${HL2SDK}")
 endif()
 set(MMSOURCE $ENV{MMSOURCE_DEV})
@@ -23,7 +23,7 @@ set(MMSOURCE $ENV{MMSOURCE_DEV})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_BUILD_TYPE Release)
 
-# eiface.h (through Metamod's headers) includes network_connection.pb.h.
+# Metamod's headers pull in network_connection.pb.h (through the engine headers).
 set(PROTOBUF_SRC ${HL2SDK}/thirdparty/protobuf-3.21.8/src)
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/network_connection.pb.h
@@ -31,7 +31,7 @@ add_custom_command(
             -I${HL2SDK}/common -I${PROTOBUF_SRC} ${HL2SDK}/common/network_connection.proto
     DEPENDS ${HL2SDK}/common/network_connection.proto)
 
-add_library(schemadump_runner SHARED runner.cpp ${HL2SDK}/tier1/convar.cpp ${CMAKE_BINARY_DIR}/network_connection.pb.h)
+add_library(schemadump_runner SHARED runner.cpp ${HL2SDK}/tier0_perproject/convar.cpp ${CMAKE_BINARY_DIR}/network_connection.pb.h)
 set_target_properties(schemadump_runner PROPERTIES PREFIX "")
 
 target_include_directories(schemadump_runner PRIVATE

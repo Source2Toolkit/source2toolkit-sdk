@@ -1,23 +1,24 @@
-﻿//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
-// Purpose:
+// Purpose: CTakeDamageInfo
 //
-//=============================================================================//
-#pragma once
+//=============================================================================
 
 #ifndef TAKEDAMAGEINFO_H
 #define TAKEDAMAGEINFO_H
+#ifdef _WIN32
+#pragma once
+#endif
 
 #include "attackerinfo.h"
 
 // DamageTypes_t comes from the game headers; the SDK no longer emits a scoped
 // copy of it (see HARD_SKIP_ENUMS in tools/schemagen/generator.py).
 #include "shareddefs.h"
-#include "entity/enums/TakeDamageFlags_t.h"
 
 #include "ehandle.h"
 #include "gametrace.h"
-#include "tier1/mempool.h"
+#include "tier0/mempool.h"
 
 class CCSPlayerPawn;
 

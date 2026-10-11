@@ -1,4 +1,4 @@
-﻿/**
+/**
 * vim: set ts=4 sw=4 tw=99 noet:
  * =============================================================================
  * Source2Toolkit
@@ -34,25 +34,24 @@
  * Project: Source2Toolkit
  */
 
-
 #include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
-
-#include "tier0/dbg.h"
-
-#include "source2toolkit/schema/entity/classes/CCSPlayerPawn.h"
-#include "source2toolkit/schema/entity/classes/CCSObserverPawn.h"
-#include "source2toolkit/schema/takedamageinfo.h"
-#include "source2toolkit/schema/takedamageresult.h"
-#include "source2toolkit/utils/virtual.h"
 
 #include "source2toolkit/IToolkitAddresses.h"
 #include "source2toolkit/IToolkitApi.h"
 #include "source2toolkit/IToolkitGameConfig.h"
 #include "source2toolkit/IToolkitMenus.h"
 #include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entity/classes/CCSObserverPawn.h"
+#include "source2toolkit/schema/entity/classes/CCSPlayerPawn.h"
+#include "source2toolkit/schema/takedamageinfo.h"
+#include "source2toolkit/schema/takedamageresult.h"
+#include "source2toolkit/utils/virtual.h"
+
+#include <tier0/dbg.h>
 TOOLKIT_GLOBALVARS();
 
-#include "iserver.h"
+#include "engine2/networkgameserverbase.h"
+#include "engine2/inetworkserverservice.h"
 
 CCSPlayerController *CCSPlayerController::FromPawn(CCSPlayerPawn* pPawn)
 {
