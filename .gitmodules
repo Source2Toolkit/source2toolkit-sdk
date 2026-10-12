@@ -6,6 +6,6 @@
 	url = https://github.com/Kenzzer/KHook.git
 [submodule "vendor/s2sdk"]
 	path = vendor/s2sdk
-	url = https://github.com/alliedmodders/s2sdk.git
+	url = https://github.com/FUNPLAY-pro-CS2/s2sdk.git
 	branch = cs2
 	shallow = true
