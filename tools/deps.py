@@ -12,7 +12,10 @@ The SDK compiles against:
   * KHook               -- vendor/khook, a submodule, which has to be the very
                            commit metamod-source was built with or the toolkit
                            core refuses every plugin at load time
-  * hl2sdk-manifests    -- vendor/hl2sdk-manifests, a submodule (AMBuild only)
+  * s2sdk-manifests     -- vendor/s2sdk-manifests, a submodule: what a binary
+                           needs from s2sdk, for AMBuild (SdkHelpers.ambuild)
+                           and CMake (s2sdk's s2sdk::s2sdk) alike;
+                           S2SDK_MANIFESTS_DIR points both at another checkout
 
 `init` asks, once, where s2sdk comes from: a checkout you already have (found
 through an environment variable -- S2SDK_CS2, S2SDKCS2, S2SDK, HL2SDK_CS2 or
@@ -271,8 +274,10 @@ def update_khook(track):
 
 
 def update_manifests():
-    say('manifests: vendor/hl2sdk-manifests -> latest master')
-    git(['submodule', 'update', '--init', '--remote', 'vendor/hl2sdk-manifests'], SDK_ROOT, check=False)
+    say('manifests: vendor/s2sdk-manifests -> latest master')
+    git(['submodule', 'update', '--init', '--remote', 'vendor/s2sdk-manifests'], SDK_ROOT, check=False)
+    if os.environ.get('S2SDK_MANIFESTS_DIR'):
+        say('manifests: note -- S2SDK_MANIFESTS_DIR is set, so builds use {} instead'.format(os.environ['S2SDK_MANIFESTS_DIR']))
 
 
 def update(args, config=None):
@@ -314,8 +319,12 @@ def status(args, config=None):
     khook = git_head(os.path.join(VENDOR, 'khook'))
     track = config.get('khook', KHOOK_TRACK)
     print('  {:<10} {:<10} {}  (tracks {} {})'.format('khook', 'submodule', khook[:12] or 'not checked out', track['repo'], track['branch']))
-    manifests = git_head(os.path.join(VENDOR, 'hl2sdk-manifests'))
-    print('  {:<10} {:<10} {}'.format('manifests', 'submodule', manifests[:12] or 'not checked out'))
+    manifests_env = os.environ.get('S2SDK_MANIFESTS_DIR')
+    if manifests_env:
+        print('  {:<10} {:<10} {}  [{}]'.format('manifests', 'env', manifests_env, git_head(manifests_env)[:12] or 'not git'))
+    else:
+        manifests = git_head(os.path.join(VENDOR, 's2sdk-manifests'))
+        print('  {:<10} {:<10} {}'.format('manifests', 'submodule', manifests[:12] or 'not checked out'))
 
     if entry and entry['mode'] != 'env' and env_path:
         print()
@@ -338,12 +347,12 @@ def main():
     p_init.add_argument('--metamod-repo', help='GitHub repo whose KHook pin to follow (default {})'.format(KHOOK_TRACK['repo']))
     p_init.add_argument('--metamod-branch', help='branch of that repo (default {})'.format(KHOOK_TRACK['branch']))
     p_init.add_argument('--no-khook', action='store_true', help='leave vendor/khook where it is')
-    p_init.add_argument('--no-manifests', action='store_true', help='leave vendor/hl2sdk-manifests where it is')
+    p_init.add_argument('--no-manifests', action='store_true', help='leave vendor/s2sdk-manifests where it is')
     p_init.set_defaults(func=init)
 
     p_update = sub.add_parser('update', help='bring every dependency up to date the way deps.json says')
     p_update.add_argument('--no-khook', action='store_true', help='leave vendor/khook where it is')
-    p_update.add_argument('--no-manifests', action='store_true', help='leave vendor/hl2sdk-manifests where it is')
+    p_update.add_argument('--no-manifests', action='store_true', help='leave vendor/s2sdk-manifests where it is')
     p_update.set_defaults(func=update)
 
     p_status = sub.add_parser('status', help='show what is configured and which commits are checked out')

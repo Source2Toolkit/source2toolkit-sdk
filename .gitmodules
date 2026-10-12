@@ -1,6 +1,3 @@
-[submodule "vendor/hl2sdk-manifests"]
-	path = vendor/hl2sdk-manifests
-	url = https://github.com/alliedmodders/hl2sdk-manifests.git
 [submodule "vendor/khook"]
 	path = vendor/khook
 	url = https://github.com/Kenzzer/KHook.git
@@ -9,3 +6,7 @@
 	url = https://github.com/FUNPLAY-pro-CS2/s2sdk.git
 	branch = cs2
 	shallow = true
+[submodule "vendor/s2sdk-manifests"]
+	path = vendor/s2sdk-manifests
+	url = https://github.com/FUNPLAY-pro-CS2/s2sdk-manifests.git
+	branch = master

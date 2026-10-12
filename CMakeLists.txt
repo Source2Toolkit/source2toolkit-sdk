@@ -23,7 +23,6 @@ if (LINUX)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs=libprotobuf.a")
-    add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
     set(CMAKE_STATIC_LIBRARY_PREFIX "")
 endif ()
 
@@ -65,6 +64,23 @@ get_directory_property(_sdk_has_parent PARENT_DIRECTORY)
 if (_sdk_has_parent)
     set(SOURCESDK "${SOURCESDK}" PARENT_SCOPE)
 endif()
+
+# s2sdk-manifests, which gives s2sdk::s2sdk (s2sdk's include paths, defines
+# and libraries) and s2sdk_protobufs(): S2SDK_MANIFESTS_DIR as a cache or
+# environment variable, else the vendor/s2sdk-manifests submodule -- the
+# checkout the AMBuild side (AMBuildScript, SdkPlugin.ambuild) uses too --
+# else fetched.
+if (NOT S2SDK_MANIFESTS_DIR)
+    if (DEFINED ENV{S2SDK_MANIFESTS_DIR} AND NOT "$ENV{S2SDK_MANIFESTS_DIR}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{S2SDK_MANIFESTS_DIR}" _manifests)
+    elseif (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2sdk-manifests/s2sdk-manifests.cmake")
+        set(_manifests "${CMAKE_CURRENT_SOURCE_DIR}/vendor/s2sdk-manifests")
+    endif ()
+    if (_manifests)
+        set(S2SDK_MANIFESTS_DIR "${_manifests}" CACHE PATH "s2sdk-manifests checkout (fetched when empty)" FORCE)
+    endif ()
+endif ()
+message(STATUS "s2sdk-manifests -> ${S2SDK_MANIFESTS_DIR}")
 
 # =========================
 # KHOOK
@@ -140,13 +156,14 @@ endif ()
 # GLOBAL CONFIG
 # =========================
 #
-# On top of what s2sdk::headers already defines for its headers.
+# On top of what s2sdk::headers already defines for its headers (from
+# s2sdk-manifests: _GLIBCXX_USE_CXX11_ABI=0 on Linux, _ITERATOR_DEBUG_LEVEL=0
+# on Windows, ...).
 
 add_library(source2toolkit-config INTERFACE)
 
 target_compile_definitions(source2toolkit-config INTERFACE
         META_IS_SOURCE2
-        _ITERATOR_DEBUG_LEVEL=0
 
         $<$<PLATFORM_ID:Linux>:
         _FILE_OFFSET_BITS=64
@@ -215,15 +232,25 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 # S2SDK
 # =========================
 #
-# Its include paths, defines and libraries as s2sdk::s2sdk, and
-# s2sdk_protobufs() for the game protobufs.
+# Its include paths, defines and libraries (the Steam API among them) as
+# s2sdk::s2sdk, from s2sdk-manifests -- what SdkHelpers.configureCxx() adds on
+# the AMBuild side -- and s2sdk_protobufs() for the game protobufs.
 
-if (NOT TARGET s2sdk)
-    add_subdirectory(${SOURCESDK} ${CMAKE_CURRENT_BINARY_DIR}/s2sdk)
+if (NOT COMMAND s2sdk_manifest)
+    if (NOT S2SDK_MANIFESTS_DIR OR NOT EXISTS "${S2SDK_MANIFESTS_DIR}/s2sdk-manifests.cmake")
+        include(FetchContent)
+        FetchContent_Declare(s2sdk_manifests
+                GIT_REPOSITORY https://github.com/FUNPLAY-pro-CS2/s2sdk-manifests.git
+                GIT_TAG master
+                GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(s2sdk_manifests)
+        set(S2SDK_MANIFESTS_DIR "${s2sdk_manifests_SOURCE_DIR}")
+    endif()
+    include("${S2SDK_MANIFESTS_DIR}/s2sdk-manifests.cmake")
 endif()
-if (NOT COMMAND s2sdk_protobufs)
-    message(FATAL_ERROR
-            "s2sdk at ${SOURCESDK} has no s2sdk_protobufs(): update it")
+if (NOT TARGET s2sdk)
+    s2sdk_manifest(cs2 "${SOURCESDK}")
 endif()
 
 # The game protobufs, generated from s2sdk's own protos into the Protobufs
@@ -310,7 +337,6 @@ target_compile_definitions(source2toolkit-sdk PUBLIC
 
 target_link_libraries(source2toolkit-sdk PUBLIC
         s2sdk::s2sdk
-        s2sdk::steam_api
         Protobufs
 )
 

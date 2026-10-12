@@ -4,15 +4,24 @@
 #
 # The SDK normally lives outside a plugin's own source tree (SOURCE2TOOLKIT_SDK),
 # and AMBuild's builder.Build() only reaches scripts inside the tree, so a plugin
-# pulls this in the way metamod's own SdkHelpers.ambuild is pulled in -- by
+# pulls this in the way s2sdk-manifests' SdkHelpers.ambuild is pulled in -- by
 # absolute path through builder.Eval():
 #
 #   ToolkitSdk = builder.Eval(os.path.join(os.environ['SOURCE2TOOLKIT_SDK'],
 #                                          'SdkPlugin.ambuild'), {})
+#   SdkHelpers = ToolkitSdk.LoadSdkHelpers(builder, builder.options.s2sdk_manifests)
 #   ...
 #   ToolkitSdk.AddToBinary(binary, sdk)
+#   SdkHelpers.configureCxx(builder, binary, sdk)
+#   ToolkitSdk.AddProtobufs(builder, binary, sdk_target)
 #
-# AddToBinary() adds the SDK's include paths, its sources and the hl2sdk
+# LoadSdkHelpers() evaluates s2sdk-manifests' SdkHelpers.ambuild -- the
+# checkout given, else S2SDK_MANIFESTS_DIR, else the SDK's own
+# vendor/s2sdk-manifests submodule. SdkHelpers.configureCxx() then adds what a
+# binary needs from s2sdk (include paths, defines, libraries with the Steam
+# API), the same lists s2sdk::s2sdk carries in CMake.
+#
+# AddToBinary() adds the toolkit SDK's include paths, its sources and the s2sdk
 # translation units it owns. The objects end up inside the plugin binary, which
 # is what the CMake path produces too -- there the SDK is a static library, and
 # a static library is just those same objects.
@@ -44,6 +53,35 @@ class ToolkitSdkPlugin(object):
     except Exception:
       self.khookCommit = 'unknown'
 
+    self.SdkHelpers = None
+
+  def ManifestsPath(self, path=None):
+    # The checkout given (a plugin's --s2sdk-manifests), else
+    # S2SDK_MANIFESTS_DIR, else the SDK's own submodule -- the one its CMake
+    # build uses too.
+    for candidate in [path, os.environ.get('S2SDK_MANIFESTS_DIR'),
+                      os.path.join(self.sourcePath, 'vendor', 's2sdk-manifests')]:
+      if candidate and os.path.isfile(os.path.join(candidate, 'SdkHelpers.ambuild')):
+        return os.path.abspath(candidate)
+    raise Exception('Could not find s2sdk-manifests -- run git submodule update --init '
+                    '--recursive in the SDK, pass --s2sdk-manifests or set S2SDK_MANIFESTS_DIR')
+
+  def LoadSdkHelpers(self, builder, path=None):
+    # s2sdk-manifests' SdkHelpers (findSdks, configureCxx, addProtobufs, ...).
+    self.SdkHelpers = builder.Eval(os.path.join(self.ManifestsPath(path), 'SdkHelpers.ambuild'))
+    return self.SdkHelpers
+
+  def FindS2Sdk(self, sdk_name):
+    # The manifest's environment variables (cs2: S2SDK_CS2, S2SDKCS2, S2SDK,
+    # HL2SDK_CS2, HL2SDKCS2 -- first set wins), else the SDK's own vendor/s2sdk.
+    path = self.SdkHelpers.findSdkPathFromEnv(sdk_name) if self.SdkHelpers else None
+    if path and os.path.isdir(path):
+      return path
+    vendored = os.path.join(self.sourcePath, 'vendor', 's2sdk')
+    if sdk_name == 'cs2' and os.path.isfile(os.path.join(vendored, 'public', 'tier0', 'platform.h')):
+      return vendored
+    return None
+
   def AddPublicIncludes(self, binary):
     # The one call a consumer of "source2toolkit/IToolkitPlugin.h" needs.
     # KHook is in there because IToolkitPlugin.h includes "khook.hpp".
@@ -54,16 +92,13 @@ class ToolkitSdkPlugin(object):
     ]
 
   def AddSdkIncludes(self, binary, sdk):
-    # Folders the toolkit headers reach into by bare name that are not in the
-    # manifests' own include list. Kept in step with CMakeLists.txt.
+    # What the toolkit headers reach into beyond s2sdk-manifests' include
+    # list -- the same list, in the same order, as CMakeLists.txt's. Ahead of
+    # s2sdk's own paths as there, so AddToBinary() goes before
+    # SdkHelpers.configureCxx().
     binary.compiler.cxxincludes += [
+      sdk['path'],
       os.path.join(sdk['path'], 'public', 'schemasystem'),
-      os.path.join(sdk['path'], 'public', 'entity2'),
-      os.path.join(sdk['path'], 'public', 'mathlib'),
-      os.path.join(sdk['path'], 'public', 'tier0'),
-      os.path.join(sdk['path'], 'public', 'tier1'),
-      os.path.join(sdk['path'], 'game', 'server'),
-      os.path.join(sdk['path'], 'thirdparty', 'protobuf-3.21.8', 'src'),
     ]
 
   def Sources(self, sdk):
@@ -74,7 +109,7 @@ class ToolkitSdkPlugin(object):
         if f.endswith('.cpp'):
           sources += [os.path.join(root, f)]
 
-    # The hl2sdk translation units the toolkit owns; a plugin must not add
+    # The s2sdk translation units the toolkit owns; a plugin must not add
     # these itself as well.
     sources += [
       os.path.join(sdk['path'], 'public', 'tier0', 'memoverride.cpp'),
@@ -114,9 +149,21 @@ class ToolkitSdkPlugin(object):
     ]
     return [os.path.join(sdk['path'], *name.split('/')) for name in names]
 
+  def AddProtobufs(self, builder, binary, sdk_target):
+    # The game protobufs, generated and compiled into the binary --
+    # s2sdk_protobufs() in CMakeLists.txt. The protos import each other by
+    # name, also from folders s2sdk-manifests' protoc doesn't search
+    # (s2sdk_protobufs() adds every listed proto's folder).
+    sdk = sdk_target.sdk
+    self.SdkHelpers.addProtobufs(builder, binary, sdk_target, self.ProtoSources(sdk))
+    binary.custom[-1].protoc.includes += [
+      os.path.join(sdk['path'], 'gcsdk'),
+      os.path.join(sdk['path'], 'game', 'shared', 'cstrike15'),
+    ]
+
   def Protoc(self, builder, sdk_target):
-    # The protos import each other by name, also from folders hl2sdk-manifests
-    # doesn't search.
+    # The same as AddProtobufs(), as a job for binary.custom -- for plugin
+    # scripts from before it.
     sdk = sdk_target.sdk
     protoc = builder.tools.Protoc(protoc=sdk_target.protoc, sources=self.ProtoSources(sdk))
     protoc.protoc.includes += [
@@ -126,30 +173,21 @@ class ToolkitSdkPlugin(object):
     return protoc
 
   def Defines(self, binary):
+    # On top of s2sdk-manifests' defines (_GLIBCXX_USE_CXX11_ABI=0 on Linux,
+    # _ITERATOR_DEBUG_LEVEL=0 on Windows among them).
     binary.compiler.defines += [
       'META_IS_SOURCE2',
-      '_ITERATOR_DEBUG_LEVEL=0',
       # Read back by TOOLKIT_SAVEVARS() and compared with the core's KHook.
       'TOOLKIT_KHOOK_COMMIT="{}"'.format(self.khookCommit),
     ]
-    if binary.compiler.target.platform == 'linux':
-      # Every consumer has to agree with the SDK here, or std::string crosses
-      # the plugin boundary with two different layouts.
-      binary.compiler.defines += ['_GLIBCXX_USE_CXX11_ABI=0']
 
   def AddToBinary(self, binary, sdk):
     self.AddPublicIncludes(binary)
     self.AddSdkIncludes(binary, sdk)
     self.Defines(binary)
     binary.sources += self.Sources(sdk)
-    self.AddSteamApi(binary, sdk)
-
-  def AddSteamApi(self, binary, sdk):
-    # Every plugin links s2sdk's Steam API, as with CMake (s2sdk::steam_api).
-    if binary.compiler.target.platform == 'linux':
-      binary.compiler.postlink += [os.path.join(sdk['path'], 'lib', 'linux64', 'libsteam_api.so')]
-    elif binary.compiler.target.platform == 'windows':
-      binary.compiler.postlink += [os.path.join(sdk['path'], 'lib', 'public', 'win64', 'steam_api64.lib')]
+    # s2sdk's libraries, the Steam API among them, come from
+    # SdkHelpers.configureCxx().
 
 
 rvalue = ToolkitSdkPlugin()

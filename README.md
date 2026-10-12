@@ -73,8 +73,15 @@ python source2toolkit-sdk/tools/deps.py update
 submodule, and saves the answer in `deps.json`. `update` pulls your checkout
 or puts the submodule on the pinned commit, moves `vendor/khook` to the KHook
 commit metamod-source pins (anything else refuses to load on the toolkit core)
-and moves `vendor/hl2sdk-manifests` to its latest. `deps.py status` shows what
-is checked out. Answer up front with `--s2sdk submodule` when there is no
+and moves `vendor/s2sdk-manifests` to its latest. `deps.py status` shows what
+is checked out.
+
+What a binary needs from s2sdk -- include paths, defines, libraries with the
+Steam API, protoc -- comes from [s2sdk-manifests](https://github.com/FUNPLAY-pro-CS2/s2sdk-manifests),
+for both build systems: CMake through s2sdk's `s2sdk::s2sdk`, AMBuild through
+its `SdkHelpers.ambuild`. Both use the `vendor/s2sdk-manifests` submodule;
+`S2SDK_MANIFESTS_DIR` (or AMBuild's `--s2sdk-manifests`) points them at another
+checkout. Answer up front with `--s2sdk submodule` when there is no
 terminal.
 
 ---

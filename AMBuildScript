@@ -7,7 +7,8 @@
 #
 #      ToolkitSdk = builder.Build('<sdk path>/AMBuildScript', {
 #        'ToolkitSdkTarget': sdk_target,     # the caller's own sdk_target,
-#        'ToolkitSdkHelpers': SdkHelpers,    # so the SDK is not detected twice
+#        'ToolkitSdkHelpers': SdkHelpers,    # s2sdk-manifests' SdkHelpers, so the
+#                                            # SDK is not detected twice
 #      })
 #      ...
 #      ToolkitSdk['config'].AddPublicIncludes(binary)
@@ -30,18 +31,16 @@ ToolkitSdkTarget = globals().get('ToolkitSdkTarget', None)
 ToolkitSdkHelpers = globals().get('ToolkitSdkHelpers', None)
 
 
-# s2sdk (alliedmodders/s2sdk, the CS2 SDK that used to be hl2sdk's cs2 branch)
-# can be named by any of these, first set wins -- the same list as
-# CMakeLists.txt, newer names first so a stale HL2SDKCS2 does not shadow them.
-S2SDK_ENV_VARS = ['S2SDK_CS2', 'S2SDKCS2', 'S2SDK', 'HL2SDK_CS2', 'HL2SDKCS2']
-
-
-def ResolveS2SdkEnv():
-  for env in S2SDK_ENV_VARS:
-    path = os.environ.get(env)
-    if path and os.path.isdir(path):
-      return path
-  return None
+def ResolveS2SdkManifests(sourcePath, option):
+  """s2sdk-manifests: --s2sdk-manifests, else S2SDK_MANIFESTS_DIR, else this
+  SDK's own vendor/s2sdk-manifests submodule -- the checkout CMake uses too
+  (S2SDK_MANIFESTS_DIR, else the submodule, else s2sdk fetches it)."""
+  for path in [option, os.environ.get('S2SDK_MANIFESTS_DIR'),
+               os.path.join(sourcePath, 'vendor', 's2sdk-manifests')]:
+    if path and os.path.isfile(os.path.join(path, 'SdkHelpers.ambuild')):
+      return os.path.abspath(path)
+  raise Exception('Could not find s2sdk-manifests -- run git submodule update --init '
+                  '--recursive, pass --s2sdk-manifests or set S2SDK_MANIFESTS_DIR')
 
 
 def ResolveEnvPath(env, folder):
@@ -140,8 +139,10 @@ class ToolkitSdkConfig(object):
       raise Exception('No suitable C/C++ compiler was found.')
 
   def findSdkPath(self, sdk_name):
-    # Order: --hl2sdk-root, an explicit deps.py choice, the environment, then
-    # the vendor/s2sdk submodule.
+    # Order: --hl2sdk-root, an explicit deps.py choice, the environment (the
+    # manifest's env_vars: S2SDK_CS2, S2SDKCS2, S2SDK, HL2SDK_CS2, HL2SDKCS2 --
+    # the same list as CMakeLists.txt, first set wins), then the vendor/s2sdk
+    # submodule.
     dir_names = ['s2sdk', 'hl2sdk-{}'.format(sdk_name)] if sdk_name == 'cs2' else ['hl2sdk-{}'.format(sdk_name)]
     if builder.options.hl2sdk_root:
       for dir_name in dir_names:
@@ -153,8 +154,8 @@ class ToolkitSdkConfig(object):
     deps = DepsPath(self.sourcePath)
     if deps and os.path.isdir(deps):
       return deps
-    env = ResolveS2SdkEnv()
-    if env:
+    env = SdkHelpers.findSdkPathFromEnv(sdk_name)
+    if env and os.path.isdir(env):
       return env
     vendored = os.path.join(self.sourcePath, "vendor", "s2sdk")
     if os.path.isfile(os.path.join(vendored, "public", "tier0", "platform.h")):
@@ -170,28 +171,12 @@ class ToolkitSdkConfig(object):
       self.sdk_manifests = SdkHelpers.sdk_manifests
       return
 
-    # hl2sdk-manifests ships with the SDK (vendor/hl2sdk-manifests), the same
-    # way metamod-source carries its own copy, so --hl2sdk-manifests is only
-    # there to point at a different checkout.
-    manifests = builder.options.hl2sdk_manifests
-    if not manifests:
-      manifests = os.path.join(self.sourcePath, 'vendor', 'hl2sdk-manifests')
-
-    if not os.path.isdir(manifests):
-      raise Exception('Could not find a source copy of HL2SDK manifests -- run '
-                      'git submodule update --init --recursive, or pass '
-                      '--hl2sdk-manifests')
-
-    SdkHelpers = builder.Eval(
-      os.path.join(manifests, 'SdkHelpers.ambuild'),
-      {'Project': 'metamod'})
-    # s2sdk carries mathlib/AMBuilder, and hl2sdk-manifests builds any SDK library
-    # it finds an AMBuilder for -- with this project's compiler and flags, which
-    # that code does not compile under -- and links it ahead of the prebuilt
-    # lib/*/mathlib the manifest lists anyway. Keep to the prebuilt one, as with
-    # hl2sdk.
-    type(SdkHelpers).configureCxx.__globals__['SdkTarget'].findLibrary = \
-      staticmethod(lambda context, sdk, cxx, name: None)
+    # s2sdk-manifests ships with the SDK (vendor/s2sdk-manifests), so
+    # --s2sdk-manifests is only there to point at a different checkout. It
+    # has what a binary needs from s2sdk -- include paths, defines, libraries
+    # with the Steam API, protoc -- the same lists s2sdk::s2sdk has in CMake.
+    manifests = ResolveS2SdkManifests(self.sourcePath, builder.options.s2sdk_manifests)
+    SdkHelpers = builder.Eval(os.path.join(manifests, 'SdkHelpers.ambuild'))
 
     sdk_list = [s for s in builder.options.sdks.split(',') if s]
     SdkHelpers.find_sdk_path = self.findSdkPath
@@ -215,14 +200,13 @@ class ToolkitSdkConfig(object):
       self.configure_cxx(cxx)
 
   def configure_cxx(self, cxx):
+    # The SDK's defines (platform, stricmp=strcasecmp, _GLIBCXX_USE_CXX11_ABI=0,
+    # X64BITS, _ITERATOR_DEBUG_LEVEL=0, ...) come from s2sdk-manifests, through
+    # SdkHelpers.configureCxx() in AddSdkIncludes().
     if cxx.behavior == 'gcc':
       cxx.defines += [
-        'stricmp=strcasecmp',
-        '_stricmp=strcasecmp',
         '_snprintf=snprintf',
-        '_vsnprintf=vsnprintf',
         'HAVE_STDINT_H',
-        'GNUC',
       ]
       cxx.cflags += [
         '-pipe',
@@ -280,21 +264,16 @@ class ToolkitSdkConfig(object):
         cxx.cflags += ['/Od', '/RTC1']
 
     if cxx.target.platform == 'linux':
-      cxx.defines += [
-        '_LINUX', 'LINUX', 'POSIX', '_FILE_OFFSET_BITS=64',
-        # Matches CMakeLists.txt -- every consumer has to agree with the SDK
-        # here or std::string crosses the boundary with two different layouts.
-        '_GLIBCXX_USE_CXX11_ABI=0',
-      ]
+      cxx.defines += ['_FILE_OFFSET_BITS=64']
       if cxx.family == 'gcc':
         cxx.linkflags += ['-static-libgcc']
       elif cxx.family == 'clang':
         cxx.linkflags += ['-lgcc_eh']
       cxx.linkflags += ['-static-libstdc++']
     elif cxx.target.platform == 'windows':
-      cxx.defines += ['WIN32', '_WINDOWS']
+      cxx.defines += ['_WINDOWS']
 
-    cxx.defines += ['META_IS_SOURCE2', 'X64BITS', 'PLATFORM_64BITS', '_ITERATOR_DEBUG_LEVEL=0']
+    cxx.defines += ['META_IS_SOURCE2']
     cxx.defines += ['TOOLKIT_KHOOK_COMMIT="{}"'.format(self.khookCommit)]
 
   def AddPublicIncludes(self, binary):
@@ -311,23 +290,19 @@ class ToolkitSdkConfig(object):
     binary.compiler.defines += ['TOOLKIT_KHOOK_COMMIT="{}"'.format(self.khookCommit)]
 
   def AddSdkIncludes(self, binary, sdk):
-    # The manifests know each SDK's include list and the defines its headers
+    # What the toolkit headers reach into beyond s2sdk-manifests' include
+    # list -- the same list, in the same order, as CMakeLists.txt's, ahead of
+    # s2sdk's own paths as there.
+    binary.compiler.cxxincludes += [
+      sdk['path'],
+      os.path.join(sdk['path'], 'public', 'schemasystem'),
+    ]
+
+    # s2sdk-manifests knows the SDK's include list and the defines its headers
     # expect (COMPILER_GCC and friends -- without them public/tier0/platform.h
-    # reaches for a Windows <new.h>), so let them do it rather than hand-listing
+    # reaches for a Windows <new.h>), so let it do it rather than hand-listing
     # folders here.
     SdkHelpers.configureCxx(builder, binary, sdk)
-
-    # Folders the toolkit headers reach into by bare name that are not in the
-    # manifests' own include list. Kept in step with CMakeLists.txt.
-    binary.compiler.cxxincludes += [
-      os.path.join(sdk['path'], 'public', 'schemasystem'),
-      os.path.join(sdk['path'], 'public', 'entity2'),
-      os.path.join(sdk['path'], 'public', 'mathlib'),
-      os.path.join(sdk['path'], 'public', 'tier0'),
-      os.path.join(sdk['path'], 'public', 'tier1'),
-      os.path.join(sdk['path'], 'game', 'server'),
-      os.path.join(sdk['path'], 'thirdparty', 'protobuf-3.21.8', 'src'),
-    ]
 
   def ProtoSources(self, sdk):
     # The game protobufs, from s2sdk's own protos.
@@ -356,16 +331,16 @@ class ToolkitSdkConfig(object):
     ]
     return [os.path.join(sdk['path'], *name.split('/')) for name in names]
 
-  def Protoc(self, builder, sdk_target):
-    # The protos import each other by name, also from folders hl2sdk-manifests
-    # doesn't search.
+  def AddProtobufs(self, binary, sdk_target):
+    # s2sdk_protobufs() in CMakeLists.txt. The protos import each other by
+    # name, also from folders s2sdk-manifests' protoc doesn't search
+    # (s2sdk_protobufs() adds every listed proto's folder).
     sdk = sdk_target.sdk
-    protoc = builder.tools.Protoc(protoc=sdk_target.protoc, sources=self.ProtoSources(sdk))
-    protoc.protoc.includes += [
+    SdkHelpers.addProtobufs(builder, binary, sdk_target, self.ProtoSources(sdk))
+    binary.custom[-1].protoc.includes += [
       os.path.join(sdk['path'], 'gcsdk'),
       os.path.join(sdk['path'], 'game', 'shared', 'cstrike15'),
     ]
-    return protoc
 
   def Library(self, cxx, name):
     return cxx.StaticLibrary(name)
@@ -401,7 +376,7 @@ class ToolkitSdkConfig(object):
         os.path.join(sdk['path'], 'entity2', 'entitykeyvalues.cpp'),
       ]
 
-      lib.custom = [self.Protoc(builder, sdk_target)]
+      self.AddProtobufs(lib, sdk_target)
 
       node = builder.Add(lib)
       self.binaries += [node]
