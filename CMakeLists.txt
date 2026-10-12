@@ -19,8 +19,6 @@ if (WIN32 AND NOT MSVC)
 endif()
 
 if (LINUX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs=libprotobuf.a")
     set(CMAKE_STATIC_LIBRARY_PREFIX "")
@@ -157,14 +155,12 @@ endif ()
 # =========================
 #
 # On top of what s2sdk::headers already defines for its headers (from
-# s2sdk-manifests: _GLIBCXX_USE_CXX11_ABI=0 on Linux, _ITERATOR_DEBUG_LEVEL=0
-# on Windows, ...).
+# s2sdk-manifests: META_IS_SOURCE2, _GLIBCXX_USE_CXX11_ABI=0 on Linux,
+# _ITERATOR_DEBUG_LEVEL=0 on Windows, ...).
 
 add_library(source2toolkit-config INTERFACE)
 
 target_compile_definitions(source2toolkit-config INTERFACE
-        META_IS_SOURCE2
-
         $<$<PLATFORM_ID:Linux>:
         _FILE_OFFSET_BITS=64
         _snprintf=snprintf
