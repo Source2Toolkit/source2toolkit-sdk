@@ -65,7 +65,7 @@ public:
     DECLARE_SCHEMA_CLASS_INLINE(CBodyComponent);
 
     SCHEMA_FIELD(CGameSceneNode*, m_pSceneNode);
-    SCHEMA_FIELD(CEntityInstance*, __m_pChainEntity);
+    SCHEMA_FIELD(CNetworkVarChainer, __m_pChainEntity);
 };
 
 #endif // _INCLUDE_CBODYCOMPONENT_H

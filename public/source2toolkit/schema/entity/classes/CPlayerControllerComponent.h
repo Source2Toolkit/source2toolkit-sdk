@@ -64,7 +64,7 @@ class CPlayerControllerComponent
 public:
     DECLARE_SCHEMA_CLASS_INLINE(CPlayerControllerComponent);
 
-    SCHEMA_FIELD(CEntityInstance*, __m_pChainEntity);
+    SCHEMA_FIELD(CNetworkVarChainer, __m_pChainEntity);
 
 public:
     /// <summary>Get player controller.</summary>

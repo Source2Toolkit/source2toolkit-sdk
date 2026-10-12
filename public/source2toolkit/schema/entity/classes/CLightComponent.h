@@ -64,7 +64,7 @@ class CLightComponent : public CEntityComponent
 public:
     DECLARE_SCHEMA_CLASS_INLINE(CLightComponent);
 
-    SCHEMA_FIELD(CEntityInstance*, __m_pChainEntity);
+    SCHEMA_FIELD(CNetworkVarChainer, __m_pChainEntity);
     SCHEMA_FIELD(Color, m_Color);
     SCHEMA_FIELD(Color, m_SecondaryColor);
     SCHEMA_FIELD(float, m_flBrightness);

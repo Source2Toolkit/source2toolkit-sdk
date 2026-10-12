@@ -39,5 +39,5 @@
 #include "source2toolkit/schema/entity/classes/CCSPlayerPawn.h"
 
 CCSPlayerPawn* CPlayerPawnComponent::GetPlayerPawn() {
-    return static_cast<CCSPlayerPawn*>(__m_pChainEntity());
+    return static_cast<CCSPlayerPawn*>(static_cast<CEntityInstance*>(__m_pChainEntity()));
 }

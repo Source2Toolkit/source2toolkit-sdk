@@ -63,6 +63,7 @@
 #include <entity2/entityclass.h>
 #include <entity2/entityidentity.h>
 #include <entity2/entityinstance.h>
+#include <networksystem/networkvar.h>
 #include <entity2/entitysystem.h>
 #include <gameentitysystem.h>
 #include <igameevents.h>
@@ -239,25 +240,6 @@ struct SchemaKey
     /// there, so the plugin keeps running with that one field doing nothing
     /// -- an error line says which, once.
     bool valid = true;
-};
-
-/**
-
-* @brief Helper for networked variable propagation.
-  */
-class CNetworkVarChainer2
-{
-public:
-    CEntityInstance* m_pEntity;
-
-private:
-    uint8 pad_0000[24];
-
-public:
-    ChangeAccessorFieldPathIndex_t m_PathIndex;
-
-private:
-    uint8 pad_0024[4];
 };
 
 /* =========================

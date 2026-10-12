@@ -241,7 +241,7 @@ class SchemaFieldType:
         if self.name == "CTransformWS":
             self.name = "CTransform"
         elif self.name == "CNetworkVarChainer":
-            self.name = "CEntityInstance*"
+            self.name = "CNetworkVarChainer"
 
         if self.name in ("GameTime_t", "CNetworkedQuantizedFloat"):
             self.category = SchemaTypeCategory.Builtin

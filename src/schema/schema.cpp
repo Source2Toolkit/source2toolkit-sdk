@@ -37,7 +37,6 @@
 #include "source2toolkit/schema/schema.h"
 
 #include "source2toolkit/IToolkitApi.h"
-#include "source2toolkit/IToolkitGameConfig.h"
 #include "source2toolkit/IToolkitModule.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/utils/virtual.h"
@@ -57,10 +56,7 @@ TOOLKIT_GLOBALVARS();
 #include <mutex>
 #include <cstring>
 #include <unordered_map>
-#include <cctype>
-#include <cstdlib>
 #include <string>
-#include <vector>
 
 #ifdef _WIN32
 #define MODULE_PREFIX ""
@@ -373,78 +369,32 @@ static bool IsInModuleText(const void* p, const void* pModuleAddress)
 }
 
 // The NetworkVar_<field> wrapper the engine puts around an embedded object
-// forwards NetworkStateChanged to the owner. Its code is recognised by the
-// gamedata signature "NetworkVar::StateChanged" (the m_nPathIndex check,
-// `cmp dword ptr [data+0x38], -1`) within the first bytes of the function.
-static constexpr const char* g_pszStateChangedSignature = "NetworkVar::StateChanged";
-static constexpr int g_nStateChangedSearchBytes = 32;
-
-// "83 7E 38 FF" / "83 ? 38 FF" -> bytes, -1 for a wildcard.
-static std::vector<int> ParseSignature(const char* pszSignature)
+// forwards NetworkStateChanged to the owner. That slot is the one whose first
+// 32 bytes check the data's path index, `cmp dword ptr [reg+0x38], -1`
+// (NetworkStateChangedData::m_nPathIndex): 83 /7 with a disp8 of 0x38 and an
+// imm8 of -1, whatever register holds the data. Same test as s2binlib's
+// find_networkvar_vtable_statechanged, no signature needed.
+static bool ChecksPathIndex(const unsigned char* pCode)
 {
-    std::vector<int> bytes;
-
-    for (const char* p = pszSignature; p && *p;)
+    for (int i = 0; i + 4 <= 32; ++i)
     {
-        if (*p == ' ')
-            ++p;
-        else if (*p == '?')
-        {
-            bytes.push_back(-1);
-            p += (p[1] == '?') ? 2 : 1;
-        }
-        else if (std::isxdigit(static_cast<unsigned char>(p[0])) && std::isxdigit(static_cast<unsigned char>(p[1])))
-        {
-            bytes.push_back(static_cast<int>(std::strtol(std::string(p, 2).c_str(), nullptr, 16)));
-            p += 2;
-        }
-        else
-            return {}; // malformed
+        const unsigned char modrm = pCode[i + 1];
+        // mod 01 (disp8), reg 111 (/7 = cmp), rm not 100 (that one takes a SIB byte)
+        if (pCode[i] == 0x83 && (modrm & 0xF8) == 0x78 && modrm != 0x7C && pCode[i + 2] == 0x38 && pCode[i + 3] == 0xFF)
+            return true;
     }
 
-    return bytes;
-}
-
-static const std::vector<int>& GetStateChangedSignature()
-{
-    static const std::vector<int> s_signature = [] {
-        const char* pszSignature = g_pToolkitGameConfig ? g_pToolkitGameConfig->GetSignature(g_pszStateChangedSignature) : nullptr;
-        std::vector<int> signature = ParseSignature(pszSignature);
-        if (signature.empty())
-            SchemaWarn("schema: gamedata signature '%s' is missing or malformed, embedded fields will not be networked!", g_pszStateChangedSignature);
-        return signature;
-    }();
-
-    return s_signature;
-}
-
-static bool MatchesAt(const unsigned char* pCode, const std::vector<int>& signature)
-{
-    for (size_t i = 0; i < signature.size(); ++i)
-    {
-        if (signature[i] != -1 && pCode[i] != signature[i])
-            return false;
-    }
-
-    return true;
+    return false;
 }
 
 static int FindNetworkStateChangedIndex(void** pVtable)
 {
-    const std::vector<int>& signature = GetStateChangedSignature();
-    if (signature.empty() || signature.size() > g_nStateChangedSearchBytes)
-        return -1;
-
     // The vtable ends where its slots stop pointing into code (Linux: the next
     // vtable's offset-to-top, Windows: its RTTI locator).
     for (int i = 0; i < 256 && IsInModuleText(pVtable[i], pVtable); ++i)
     {
-        const unsigned char* pCode = static_cast<const unsigned char*>(pVtable[i]);
-        for (size_t j = 0; j + signature.size() <= g_nStateChangedSearchBytes; ++j)
-        {
-            if (MatchesAt(pCode + j, signature))
-                return i;
-        }
+        if (ChecksPathIndex(static_cast<const unsigned char*>(pVtable[i])))
+            return i;
     }
 
     return -1;
@@ -482,10 +432,10 @@ void EntityNetworkStateChanged(uintptr_t pEntity, uint nOffset)
     reinterpret_cast<CEntityInstance*>(pEntity)->NetworkStateChanged(data);
 }
 
+// s2sdk's chainer passes it on to its entity with its own path index, and
+// drops it while the entity is still being constructed.
 void ChainNetworkStateChanged(uintptr_t pNetworkVarChainer, uint nLocalOffset)
 {
-    CEntityInstance* pEntity = reinterpret_cast<CNetworkVarChainer2*>(pNetworkVarChainer)->m_pEntity;
-
-    if (pEntity)
-        pEntity->NetworkStateChanged(NetworkStateChangedData(nLocalOffset, -1, reinterpret_cast<CNetworkVarChainer2*>(pNetworkVarChainer)->m_PathIndex));
+    NetworkStateChangedData data(nLocalOffset);
+    reinterpret_cast<CNetworkVarChainer*>(pNetworkVarChainer)->NetworkStateChanged(data);
 }

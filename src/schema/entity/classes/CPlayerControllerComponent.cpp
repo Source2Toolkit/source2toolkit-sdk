@@ -39,5 +39,5 @@
 #include "source2toolkit/schema/entity/classes/CCSPlayerController.h"
 
 CCSPlayerController* CPlayerControllerComponent::GetPlayerController() {
-    return static_cast<CCSPlayerController*>(__m_pChainEntity());
+    return static_cast<CCSPlayerController*>(static_cast<CEntityInstance*>(__m_pChainEntity()));
 }

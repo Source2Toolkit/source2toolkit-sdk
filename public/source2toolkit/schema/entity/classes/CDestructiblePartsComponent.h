@@ -64,7 +64,7 @@ class CDestructiblePartsComponent
 public:
     DECLARE_SCHEMA_CLASS_INLINE(CDestructiblePartsComponent);
 
-    SCHEMA_FIELD(CEntityInstance*, __m_pChainEntity);
+    SCHEMA_FIELD(CNetworkVarChainer, __m_pChainEntity);
     SCHEMA_FIELD(CUtlVector<uint16_t>, m_vecDamageTakenByHitGroup);
     SCHEMA_FIELD(CHandle<CBaseModelEntity>, m_hOwner);
     SCHEMA_FIELD(CAnimGraphControllerPtr, m_pAnimGraphDestructibleGraphController);

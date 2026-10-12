@@ -64,7 +64,7 @@ class CChoreoComponent
 public:
     DECLARE_SCHEMA_CLASS_INLINE(CChoreoComponent);
 
-    SCHEMA_FIELD(CEntityInstance*, __m_pChainEntity);
+    SCHEMA_FIELD(CNetworkVarChainer, __m_pChainEntity);
     SCHEMA_FIELD(CHandle<CBaseModelEntity>, m_hOwner);
     SCHEMA_FIELD(int32_t, m_nExernalChoreoGraphCount);
     SCHEMA_FIELD(CGlobalSymbol, m_sActiveExternalChoreoGraphSlotID);
