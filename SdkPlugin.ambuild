@@ -29,9 +29,10 @@
 # Hooks are KHook, header-only for a plugin: the engine comes from metamod at
 # load time. The headers are the SDK's own vendor/khook submodule (nothing of
 # it is built), so a plugin needs no metamod-source checkout.
-# TOOLKIT_KHOOK_COMMIT, defined from that submodule, is what TOOLKIT_SAVEVARS()
-# compares with the core's own KHook at plugin load.
-import os, subprocess
+# TOOLKIT_KHOOK_HEADER (a hash of its khook.hpp) and TOOLKIT_KHOOK_COMMIT,
+# defined from that submodule, are what KHOOK_INIT() compares with the core's
+# own KHook at plugin load.
+import hashlib, os, subprocess
 
 class ToolkitSdkPlugin(object):
   def __init__(self):
@@ -52,6 +53,11 @@ class ToolkitSdkPlugin(object):
       self.khookCommit = out.decode('ascii', 'ignore').strip() or 'unknown'
     except Exception:
       self.khookCommit = 'unknown'
+
+    # Mirrors CMakeLists.txt's toolkit_khook_header_hash(): the first 16 hex
+    # digits of the SHA-256 of khook.hpp with CRs dropped.
+    with open(os.path.join(self.khookPath, 'include', 'khook.hpp'), 'rb') as f:
+      self.khookHeader = hashlib.sha256(f.read().replace(b'\r', b'')).hexdigest()[:16]
 
     self.SdkHelpers = None
 
@@ -176,8 +182,9 @@ class ToolkitSdkPlugin(object):
     # On top of s2sdk-manifests' defines (META_IS_SOURCE2, _GLIBCXX_USE_CXX11_ABI=0
     # on Linux, _ITERATOR_DEBUG_LEVEL=0 on Windows among them).
     binary.compiler.defines += [
-      # Read back by TOOLKIT_SAVEVARS() and compared with the core's KHook.
+      # Read back by KHOOK_INIT() and compared with the core's KHook.
       'TOOLKIT_KHOOK_COMMIT="{}"'.format(self.khookCommit),
+      'TOOLKIT_KHOOK_HEADER="{}"'.format(self.khookHeader),
     ]
 
   def AddToBinary(self, binary, sdk):

@@ -151,12 +151,20 @@ Export system
 #define TOOLKIT_KHOOK_INTERFACE "S2ToolkitKHook001"
 
 /// The commit of the KHook the core was compiled against, as a const char*
-/// (nullptr from a core that predates the check). TOOLKIT_SAVEVARS() compares
-/// it with TOOLKIT_KHOOK_COMMIT, the commit this plugin was compiled against,
-/// and refuses the load on a mismatch: the header and the engine are one
-/// library, and a plugin that hooks through a different KHook than the one
-/// running is undefined behaviour with a delay on it.
+/// (nullptr from a core that predates the check). Plugins built before
+/// TOOLKIT_KHOOK_HEADER_INTERFACE compare it with their TOOLKIT_KHOOK_COMMIT;
+/// newer ones only fall back to it on a core that does not report the header.
 #define TOOLKIT_KHOOK_VERSION_INTERFACE "S2ToolkitKHookVersion001"
+
+/// A hash of the khook.hpp the core was compiled against, as a const char*
+/// (nullptr from a core that predates it). KHOOK_INIT() compares it with
+/// TOOLKIT_KHOOK_HEADER and refuses the load on a mismatch. khook.hpp is the
+/// whole contract between a plugin's hooks and metamod's engine (IKHook and
+/// the callback templates), so a KHook update that only touched its src/
+/// keeps every plugin loading, while any change to the header -- the one
+/// that can make a plugin hook through an engine it does not match -- does
+/// not.
+#define TOOLKIT_KHOOK_HEADER_INTERFACE "S2ToolkitKHookHeader001"
 
 #ifndef TOOLKIT_KHOOK_COMMIT
 /// Set by the SDK's CMakeLists.txt / AMBuildScript from vendor/khook (the
@@ -165,16 +173,37 @@ Export system
 #define TOOLKIT_KHOOK_COMMIT "unknown"
 #endif
 
-/// The load-time half of the KHook check; TOOLKIT_SAVEVARS() calls it.
+#ifndef TOOLKIT_KHOOK_HEADER
+/// Set by the SDK's CMakeLists.txt / AMBuildScript: the first 16 hex digits of
+/// the SHA-256 of khook.hpp with CRs dropped. A build that bypassed both gets
+/// "unknown", and the check falls back to the commit.
+#define TOOLKIT_KHOOK_HEADER "unknown"
+#endif
+
+/// The load-time half of the KHook check; KHOOK_INIT() calls it.
 ///
-/// Returns false and fills `error` only when both commits are known and
-/// differ. A side that cannot say -- a core too old to answer, a plugin built
-/// without git -- makes the check impossible, not failed: that goes out
-/// through `note` and the load goes on.
-inline bool ToolkitKHookVersionMatches(const char* coreCommit, char* error, size_t maxlen, const char** note)
+/// Compares the khook.hpp hashes when both sides have one, else the commits
+/// (a core older than the header hash). Returns false and fills `error` only
+/// when the compared values are known and differ. A side that cannot say --
+/// a core too old to answer, a plugin built without git -- makes the check
+/// impossible, not failed: that goes out through `note` and the load goes on.
+inline bool ToolkitKHookVersionMatches(const char* coreHeader, const char* coreCommit, char* error, size_t maxlen, const char** note)
 {
     if (note)
         *note = nullptr;
+
+    if (coreHeader && coreHeader[0] && strcmp(TOOLKIT_KHOOK_HEADER, "unknown") != 0)
+    {
+        if (strcmp(coreHeader, TOOLKIT_KHOOK_HEADER) == 0)
+            return true;
+
+        if (error && maxlen)
+            snprintf(error, maxlen,
+                     "KHook mismatch: plugin built against khook.hpp %s, toolkit core runs %s -- "
+                     "rebuild the plugin with an SDK whose vendor/khook has the core's header, or update the core",
+                     TOOLKIT_KHOOK_HEADER, coreHeader);
+        return false;
+    }
 
     if (!coreCommit || !coreCommit[0])
     {
@@ -511,6 +540,7 @@ Globals
     IToolkitPlugin*          g_PluginAPI               = nullptr; \
     PluginId                 g_PluginID                = 0; \
     const char*             g_ToolkitCoreKHookCommit = nullptr; \
+    const char*             g_ToolkitCoreKHookHeader = nullptr; \
     IToolkitAddresses*       g_pToolkitAddresses       = nullptr; \
     IToolkitCommands*        g_pToolkitCommands        = nullptr; \
     IToolkitConVars*         g_pToolkitConVars         = nullptr; \
@@ -555,6 +585,7 @@ Globals
     extern IToolkitPlugin*          g_PluginAPI; \
     extern PluginId                 g_PluginID; \
     extern const char*             g_ToolkitCoreKHookCommit; \
+    extern const char*             g_ToolkitCoreKHookHeader; \
     extern IToolkitAddresses*       g_pToolkitAddresses; \
     extern IToolkitCommands*        g_pToolkitCommands; \
     extern IToolkitConVars*         g_pToolkitConVars; \
@@ -613,14 +644,12 @@ Globals
 * @brief Initializes global variables inside Load().
 *
 * @note Must be called in plugin Load(), with its parameters under their
-*       declared names (id, api, error, maxlen): the KHook version check in
-*       here writes `error` and returns false out of Load() when the KHook
-*       this plugin was compiled against is not the one the core runs
-*       (see TOOLKIT_KHOOK_VERSION_INTERFACE).
+*       declared names (id, api, error, maxlen).
   */
-// The KHook commit check is not here any more: a plugin that never hooks
-// (nothing but the toolkit's own interfaces) does not care which KHook the
-// core runs. KHOOK_INIT() makes the check, the first time KHook is used.
+// The KHook check is not here: a plugin that never hooks (nothing but the
+// toolkit's own interfaces) does not care which KHook the core runs.
+// KHOOK_INIT() makes it, the first time KHook is used, from the two values
+// fetched here (see TOOLKIT_KHOOK_HEADER_INTERFACE).
 #define TOOLKIT_SAVEVARS() \
     g_ToolkitAPI = api; \
     /* s2sdk's GameEntitySystem() (entity2/entitysystem.cpp) reads it */ \
@@ -629,6 +658,7 @@ Globals
     g_PluginID   = id; \
     KHook::__exported__khook = static_cast<KHook::IKHook*>(api->ToolkitFactory(TOOLKIT_KHOOK_INTERFACE, nullptr, nullptr)); \
     g_ToolkitCoreKHookCommit = static_cast<const char*>(api->ToolkitFactory(TOOLKIT_KHOOK_VERSION_INTERFACE, nullptr, nullptr)); \
+    g_ToolkitCoreKHookHeader = static_cast<const char*>(api->ToolkitFactory(TOOLKIT_KHOOK_HEADER_INTERFACE, nullptr, nullptr)); \
     TOOLKIT_FILLVARS(api)
 
 /* =========================

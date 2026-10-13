@@ -1125,9 +1125,10 @@ Macros
 * @brief Installs every hook declared with the macros above. Call in Load(),
 * after TOOLKIT_SAVEVARS() and once the instance pointers hooks read are set.
 *
-* This is also where the KHook commit check happens: a plugin that hooks
-* through KHook shares the detour engine with the core and must have been
-* built against the same KHook (template layout), so a mismatch returns
+* This is also where the KHook check happens: a plugin that hooks through
+* KHook shares the detour engine with the core and must have been built
+* against the same khook.hpp (IKHook and the template layout; a KHook update
+* confined to its src/ does not count), so a mismatch returns
 * false out of Load() with the reason in `error`. A plugin that never calls
 * this is not checked -- it does not hook, so it does not care. A plugin
 * using raw KHook objects (KHOOK_NEW) without any KHOOK_* macro must call
@@ -1138,7 +1139,7 @@ Macros
 #define KHOOK_CHECK() \
     do { \
         const char* toolkitKHookNote = nullptr; \
-        if (!::ToolkitKHookVersionMatches(g_ToolkitCoreKHookCommit, error, maxlen, &toolkitKHookNote)) \
+        if (!::ToolkitKHookVersionMatches(g_ToolkitCoreKHookHeader, g_ToolkitCoreKHookCommit, error, maxlen, &toolkitKHookNote)) \
             return false; \
         if (toolkitKHookNote) \
             g_ToolkitAPI->Log(g_PluginAPI, "%s\n", toolkitKHookNote); \

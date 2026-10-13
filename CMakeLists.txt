@@ -95,10 +95,14 @@ message(STATUS "s2sdk-manifests -> ${S2SDK_MANIFESTS_DIR}")
 # plugin, its engine is the KHook compiled into metamod, and it has to use
 # that copy's headers so what it compiles against is what it runs on.
 #
-# TOOLKIT_KHOOK_COMMIT is the commit of whichever copy was used. The core
-# answers TOOLKIT_KHOOK_VERSION_INTERFACE with its own, and TOOLKIT_SAVEVARS()
-# compares the two at plugin load, so a plugin built against one KHook can
-# never silently hook through another (see IToolkitPlugin.h).
+# TOOLKIT_KHOOK_HEADER is a hash of that copy's include/khook.hpp -- the whole
+# contract between a plugin's hooks and metamod's engine; KHook changes that
+# stay in its src/ do not touch it. The core answers
+# TOOLKIT_KHOOK_HEADER_INTERFACE with its own and KHOOK_INIT() compares the
+# two, so a plugin can never hook through a KHook with a different header
+# (see IToolkitPlugin.h). TOOLKIT_KHOOK_COMMIT, the copy's commit, is what
+# plugins built before the header hash compare, and what a new plugin falls
+# back to on a core that does not report the hash.
 
 if (SOURCE2TOOLKIT_CORE AND DEFINED ENV{MMSOURCE_DEV} AND NOT "$ENV{MMSOURCE_DEV}" STREQUAL "")
     file(TO_CMAKE_PATH "$ENV{MMSOURCE_DEV}" _metamod)
@@ -131,22 +135,30 @@ if (GIT_FOUND)
 endif ()
 message(STATUS "KHook commit: ${TOOLKIT_KHOOK_COMMIT}")
 
-if (SOURCE2TOOLKIT_CORE AND GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/khook/include/khook.hpp")
+# First 16 hex digits of the SHA-256 of khook.hpp with CRs dropped, so a
+# CRLF checkout hashes like an LF one. SdkPlugin.ambuild computes the same.
+function(toolkit_khook_header_hash header out)
+    file(READ "${header}" _content)
+    string(REPLACE "\r" "" _content "${_content}")
+    string(SHA256 _hash "${_content}")
+    string(SUBSTRING "${_hash}" 0 16 _hash)
+    set(${out} "${_hash}" PARENT_SCOPE)
+endfunction()
+
+toolkit_khook_header_hash("${KHOOK_DIR}/include/khook.hpp" TOOLKIT_KHOOK_HEADER)
+message(STATUS "KHook header: ${TOOLKIT_KHOOK_HEADER}")
+
+if (SOURCE2TOOLKIT_CORE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/khook/include/khook.hpp")
     # The core compiles against metamod's copy, plugins against the submodule.
-    # They have to be the same commit, or every plugin fails its load check.
-    execute_process(
-            COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/vendor/khook
-            OUTPUT_VARIABLE _sdk_khook_commit
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-    )
-    if (NOT "${_sdk_khook_commit}" STREQUAL "${TOOLKIT_KHOOK_COMMIT}")
+    # Their khook.hpp has to be the same, or every hooking plugin fails its
+    # load check; a KHook bump that only touched src/ is fine.
+    toolkit_khook_header_hash("${CMAKE_CURRENT_SOURCE_DIR}/vendor/khook/include/khook.hpp" _sdk_khook_header)
+    if (NOT "${_sdk_khook_header}" STREQUAL "${TOOLKIT_KHOOK_HEADER}")
         message(WARNING
-                "KHook pin drift: metamod-source has ${TOOLKIT_KHOOK_COMMIT}, "
-                "the SDK submodule vendor/khook has ${_sdk_khook_commit}. "
-                "Plugins built from this SDK will refuse to load on this core "
-                "until both point at the same commit.")
+                "KHook header drift: metamod-source's khook.hpp (${TOOLKIT_KHOOK_HEADER}) "
+                "differs from the SDK submodule vendor/khook's (${_sdk_khook_header}). "
+                "Plugins built from this SDK that hook will refuse to load on this "
+                "core until vendor/khook is bumped to a commit with metamod's header.")
     endif ()
 endif ()
 
@@ -325,6 +337,7 @@ target_include_directories(source2toolkit-sdk PUBLIC
 # against. Read back by TOOLKIT_SAVEVARS() and by the core's ToolkitFactory.
 target_compile_definitions(source2toolkit-sdk PUBLIC
         TOOLKIT_KHOOK_COMMIT="${TOOLKIT_KHOOK_COMMIT}"
+        TOOLKIT_KHOOK_HEADER="${TOOLKIT_KHOOK_HEADER}"
 )
 
 # =========================

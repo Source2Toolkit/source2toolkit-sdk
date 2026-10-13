@@ -22,9 +22,10 @@
 #    Hooks are KHook, header-only for a plugin: the engine comes from metamod
 #    at load time. The headers are the vendor/khook submodule of this repo
 #    (nothing of it is built), so a plugin needs no metamod-source checkout.
-#    TOOLKIT_KHOOK_COMMIT, defined here from that submodule, is what
-#    TOOLKIT_SAVEVARS() compares with the core's own KHook at plugin load.
-import json, os, sys, subprocess
+#    TOOLKIT_KHOOK_HEADER (a hash of its khook.hpp) and TOOLKIT_KHOOK_COMMIT,
+#    defined here from that submodule, are what KHOOK_INIT() compares with the
+#    core's own KHook at plugin load.
+import hashlib, json, os, sys, subprocess
 
 # Injected by a parent build; None when standalone.
 ToolkitSdkTarget = globals().get('ToolkitSdkTarget', None)
@@ -95,6 +96,14 @@ def KHookCommit(khookPath):
     return 'unknown'
 
 
+def KHookHeader(khookPath):
+  # Mirrors CMakeLists.txt's toolkit_khook_header_hash(): the first 16 hex
+  # digits of the SHA-256 of khook.hpp with CRs dropped.
+  with open(os.path.join(khookPath, 'include', 'khook.hpp'), 'rb') as f:
+    content = f.read().replace(b'\r', b'')
+  return hashlib.sha256(content).hexdigest()[:16]
+
+
 class ToolkitSdkConfig(object):
   def __init__(self):
     # Snapshot now, while this repo's own AMBuildScript is the currently
@@ -105,6 +114,7 @@ class ToolkitSdkConfig(object):
     self.sourcePath = builder.currentSourcePath
     self.khookPath = KHookPath(self.sourcePath)
     self.khookCommit = KHookCommit(self.khookPath)
+    self.khookHeader = KHookHeader(self.khookPath)
 
     self.all_targets = []
     self.binaries = []
@@ -275,6 +285,7 @@ class ToolkitSdkConfig(object):
 
     cxx.defines += ['META_IS_SOURCE2']
     cxx.defines += ['TOOLKIT_KHOOK_COMMIT="{}"'.format(self.khookCommit)]
+    cxx.defines += ['TOOLKIT_KHOOK_HEADER="{}"'.format(self.khookHeader)]
 
   def AddPublicIncludes(self, binary):
     # The one call a consumer of "source2toolkit/IToolkitPlugin.h" needs:
@@ -285,9 +296,10 @@ class ToolkitSdkConfig(object):
       os.path.join(self.sourcePath, 'public'),
       os.path.join(self.khookPath, 'include'),
     ]
-    # The consumer has to carry the same commit the SDK objects do, or its
-    # TOOLKIT_SAVEVARS() would compare the core against the wrong value.
+    # The consumer has to carry the same KHook the SDK objects do, or its
+    # KHOOK_INIT() would compare the core against the wrong value.
     binary.compiler.defines += ['TOOLKIT_KHOOK_COMMIT="{}"'.format(self.khookCommit)]
+    binary.compiler.defines += ['TOOLKIT_KHOOK_HEADER="{}"'.format(self.khookHeader)]
 
   def AddSdkIncludes(self, binary, sdk):
     # What the toolkit headers reach into beyond s2sdk-manifests' include
