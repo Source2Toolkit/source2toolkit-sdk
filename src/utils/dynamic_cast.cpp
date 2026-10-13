@@ -49,7 +49,9 @@
 // target by name (ignoring class/struct and the SDK's offset hint), and caches
 // the result per (vtable, source type, target type) -- after the first cast of
 // a given class it is one hash lookup. Plain dynamic_cast in plugin code, no
-// helper to call.
+// helper to call. Before a cast is computed, its vtable and RTTI records must
+// lie in the read-only data of a loaded binary (sections from IToolkitModule),
+// so a dangling or foreign pointer fails instead of being walked.
 //
 // The symbols are hidden (Linux) / per-binary (Windows), so every plugin gets
 // its own copy and nothing outside it is affected. Define
@@ -66,11 +68,16 @@
 #include <vector>
 
 #ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <Windows.h>
+	#include <windows.h>
 #else
 	#include <dlfcn.h>
 #endif
+
+#include "source2toolkit/IToolkitApi.h"
+#include "source2toolkit/IToolkitMemory.h"
+#include "source2toolkit/IToolkitModule.h"
+#include "source2toolkit/IToolkitPlugin.h"
+TOOLKIT_GLOBALVARS();
 
 namespace
 {
@@ -255,18 +262,112 @@ namespace
         }
     }
 
-    // Whether the address lies in a loaded binary -- a vtable or RTTI record
-    // always does. Checked only when a cast is computed, not on cache hits.
-    bool InLoadedModule(const void* address)
+    // Whether the address lies in some loaded binary at all.
+    bool InLoadedModule(IToolkitMemory address)
     {
 #ifdef _WIN32
         HMODULE module = nullptr;
         return GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                                  static_cast<LPCSTR>(address), &module) && module;
+                                  address.RCast<LPCSTR>(), &module) && module;
 #else
         Dl_info info;
-        return dladdr(address, &info) && info.dli_fbase;
+        return dladdr(address.GetPtr(), &info) && info.dli_fbase;
 #endif
+    }
+
+    // The read-only data sections of the binaries casts have met -- where
+    // every vtable, object locator and type_info lives. Each binary is looked
+    // up once through IToolkitModule (DynLibUtils' section table, in the core)
+    // and only the ranges are kept, the wrapper is freed right away.
+    // Append-only and read without a lock, like the cast cache. A binary
+    // unloaded later leaves its ranges behind; only a dangling object could
+    // point there.
+#ifdef _WIN32
+    constexpr const char* kRttiSectionNames[] = { ".rdata" };
+#else
+    constexpr const char* kRttiSectionNames[] = { ".data.rel.ro", ".data.rel.ro.local", ".rodata" };
+#endif
+
+    struct RttiSection
+    {
+        std::atomic<uintptr_t> begin; // published last, 0 until then
+        uintptr_t end;
+    };
+
+    constexpr size_t kRttiSectionsMax = 256;
+    RttiSection g_RttiSections[kRttiSectionsMax];
+    std::atomic<size_t> g_RttiSectionCount;
+    std::atomic_flag g_RttiSectionsLock = ATOMIC_FLAG_INIT;
+
+    // Set while this thread is inside the module lookup, which runs core code
+    // that may cast as well -- such a cast takes the plain loaded-binary check.
+    thread_local bool t_InModuleLookup;
+
+    bool InKnownRttiSection(IToolkitMemory address)
+    {
+        const size_t count = g_RttiSectionCount.load(std::memory_order_acquire);
+        for (size_t i = 0; i < count; i++)
+        {
+            const uintptr_t begin = g_RttiSections[i].begin.load(std::memory_order_acquire);
+            if (begin && address.GetAddr() >= begin && address.GetAddr() < g_RttiSections[i].end)
+                return true;
+        }
+        return false;
+    }
+
+    // Records the RTTI sections of the binary holding the address. False when
+    // the core cannot describe that binary.
+    bool AddRttiSectionsOf(IToolkitMemory address)
+    {
+        t_InModuleLookup = true;
+
+        bool described = false;
+        if (IToolkitModule* module = IToolkitModule::New(address))
+        {
+            while (g_RttiSectionsLock.test_and_set(std::memory_order_acquire))
+                ;
+
+            for (const char* name : kRttiSectionNames)
+            {
+                const IToolkitModule::SectionInfo section = module->GetSectionByName(name);
+                if (!section.IsValid())
+                    continue;
+
+                described = true;
+                const size_t count = g_RttiSectionCount.load(std::memory_order_relaxed);
+                if (count == kRttiSectionsMax || InKnownRttiSection(section.base))
+                    continue;
+
+                g_RttiSections[count].end = section.base + section.size;
+                g_RttiSections[count].begin.store(section.base, std::memory_order_release);
+                g_RttiSectionCount.store(count + 1, std::memory_order_release);
+            }
+
+            g_RttiSectionsLock.clear(std::memory_order_release);
+            g_ToolkitAPI->FreeModule(module);
+        }
+
+        t_InModuleLookup = false;
+        return described;
+    }
+
+    // Whether the address is RTTI data of a loaded binary. Checked only when a
+    // cast is computed, never on cache hits. Before the plugin is loaded
+    // (static initialisers run before Load) there is no core to ask, and only
+    // being inside some binary is checked.
+    bool IsRttiAddress(IToolkitMemory address)
+    {
+        if (!address)
+            return false;
+        if (InKnownRttiSection(address))
+            return true;
+        if (!InLoadedModule(address))
+            return false;
+        if (!g_ToolkitAPI || t_InModuleLookup)
+            return true;
+        if (!AddRttiSectionsOf(address))
+            return true; // in a binary the core cannot read -- trust it, as before
+        return InKnownRttiSection(address);
     }
 }
 
@@ -319,24 +420,25 @@ namespace
     constexpr uint32_t BCD_NOTVISIBLE = 0x01;     // not a public base of the whole object
     constexpr uint32_t BCD_PRIVORPROTBASE = 0x04; // a private or protected base of its parent
 
-    const RttiCompleteObjectLocator* GetLocator(const void* object)
+    // The locator sits in the slot before the first virtual function.
+    const RttiCompleteObjectLocator* GetLocator(IToolkitMemory object)
     {
-        return (*static_cast<const RttiCompleteObjectLocator* const* const*>(object))[-1];
+        return object.Deref().Offset(-0x8).Deref().RCast<const RttiCompleteObjectLocator*>();
     }
 
-    char* FindCompleteObject(void* object)
+    char* FindCompleteObject(IToolkitMemory object)
     {
         const RttiCompleteObjectLocator* locator = GetLocator(object);
-        char* complete = static_cast<char*>(object) - locator->offset;
+        IToolkitMemory complete = object.Offset(-static_cast<ptrdiff_t>(locator->offset));
         if (locator->cdOffset)
-            complete -= *reinterpret_cast<const int32_t*>(static_cast<char*>(object) - locator->cdOffset);
-        return complete;
+            complete.OffsetSelf(-object.Offset(-static_cast<ptrdiff_t>(locator->cdOffset)).GetValue<int32_t>());
+        return complete.RCast<char*>();
     }
 
     template<typename T>
     const T* FromRva(uintptr_t imageBase, uint32_t rva)
     {
-        return reinterpret_cast<const T*>(imageBase + rva);
+        return IToolkitMemory(imageBase).Offset(rva).RCast<const T*>();
     }
 
     ptrdiff_t PMDtoOffset(const char* complete, const RttiPMD& where)
@@ -344,8 +446,9 @@ namespace
         ptrdiff_t offset = 0;
         if (where.pdisp >= 0)
         {
+            // A virtual base: its offset is in the vbtable of the subobject at pdisp.
             offset = where.pdisp;
-            offset += *reinterpret_cast<const int32_t*>(*reinterpret_cast<const char* const*>(complete + offset) + where.vdisp);
+            offset += IToolkitMemory(complete).Offset(offset).Deref().Offset(where.vdisp).GetValue<int32_t>();
         }
         return offset + where.mdisp;
     }
@@ -353,15 +456,15 @@ namespace
     // kCastFails, or the delta from inptr to the target.
     ptrdiff_t ComputeCast(void* inptr, long vfDelta, const RttiTypeDescriptor* srcType, const RttiTypeDescriptor* dstType)
     {
-        const void* vtable = *static_cast<const void* const*>(inptr);
-        if (!InLoadedModule(vtable))
+        const IToolkitMemory vtable = IToolkitMemory(inptr).Deref();
+        if (!IsRttiAddress(vtable))
             return kCastFails;
 
         const RttiCompleteObjectLocator* locator = GetLocator(inptr);
-        if (!InLoadedModule(locator) || locator->signature != 1)
+        if (!IsRttiAddress(locator) || locator->signature != 1)
             return kCastFails;
 
-        const uintptr_t imageBase = reinterpret_cast<uintptr_t>(locator) - locator->self;
+        const uintptr_t imageBase = IToolkitMemory(locator).Offset(-static_cast<ptrdiff_t>(locator->self)).GetAddr();
         const auto* hierarchy = FromRva<RttiClassHierarchyDescriptor>(imageBase, locator->classDescriptor);
         const auto* baseArray = FromRva<uint32_t>(imageBase, hierarchy->baseClassArray);
 
@@ -414,7 +517,7 @@ extern "C" void* __cdecl __RTDynamicCast(void* inptr, long vfDelta, void* srcTyp
     if (!CastCacheFind(vtable, srcType, targetType, delta))
     {
         delta = ComputeCast(inptr, vfDelta, static_cast<const RttiTypeDescriptor*>(srcType), static_cast<const RttiTypeDescriptor*>(targetType));
-        if (delta != kCastFails || InLoadedModule(vtable))
+        if (delta != kCastFails || IsRttiAddress(vtable))
             CastCacheStore(vtable, srcType, targetType, delta);
     }
 
@@ -439,7 +542,7 @@ extern "C" void* __cdecl __RTtypeid(void* inptr) noexcept(false)
         throw std::bad_typeid();
 
     const RttiCompleteObjectLocator* locator = GetLocator(inptr);
-    const uintptr_t imageBase = reinterpret_cast<uintptr_t>(locator) - locator->self;
+    const uintptr_t imageBase = IToolkitMemory(locator).Offset(-static_cast<ptrdiff_t>(locator->self)).GetAddr();
     return const_cast<RttiTypeDescriptor*>(FromRva<RttiTypeDescriptor>(imageBase, locator->typeDescriptor));
 }
 
@@ -484,7 +587,7 @@ namespace
     // -- no symbol or signature of the owning runtime needed.
     TypeInfoKind GetKind(const ItaniumTypeInfo* type)
     {
-        const auto* meta = static_cast<const ItaniumTypeInfo* const*>(type->vtable)[-1];
+        const auto* meta = IToolkitMemory(type->vtable).Offset(-0x8).Deref().RCast<const ItaniumTypeInfo*>();
         const char* name = meta->name;
         if (std::strcmp(name, "N10__cxxabiv120__si_class_type_infoE") == 0)
             return TypeInfoKind::Si;
@@ -516,8 +619,7 @@ namespace
                 {
                     // A virtual base: the offset is a slot in this
                     // subobject's vtable that holds the real offset.
-                    const char* vtable = *reinterpret_cast<const char* const*>(whole + offset);
-                    baseOffset = *reinterpret_cast<const ptrdiff_t*>(vtable + baseOffset);
+                    baseOffset = IToolkitMemory(whole).Offset(offset).Deref().Offset(baseOffset).GetValue<ptrdiff_t>();
                 }
                 WalkBases(base.type, whole, offset + baseOffset, index, (base.offsetFlags & 2) != 0, nodes);
             }
@@ -534,13 +636,14 @@ namespace
     // kCastFails, or the delta from src to the target.
     ptrdiff_t ComputeCast(const void* src, const ItaniumTypeInfo* srcType, const ItaniumTypeInfo* dstType)
     {
-        const auto* vtable = *static_cast<const ptrdiff_t* const*>(src);
-        if (!InLoadedModule(vtable))
+        // The vtable prefix: offset to the whole object at -0x10, its type_info at -0x8.
+        const IToolkitMemory vtable = IToolkitMemory(src).Deref();
+        if (!IsRttiAddress(vtable))
             return kCastFails;
 
-        const ptrdiff_t offsetToTop = vtable[-2];
-        const auto* wholeType = reinterpret_cast<const ItaniumTypeInfo*>(vtable[-1]);
-        if (!InLoadedModule(wholeType))
+        const ptrdiff_t offsetToTop = vtable.Offset(-0x10).GetValue<ptrdiff_t>();
+        const auto* wholeType = vtable.Offset(-0x8).Deref().RCast<const ItaniumTypeInfo*>();
+        if (!IsRttiAddress(wholeType))
             return kCastFails;
 
         const char* whole = static_cast<const char*>(src) + offsetToTop;
@@ -568,7 +671,7 @@ extern "C" __attribute__((visibility("hidden"))) void* __dynamic_cast(const void
     if (!CastCacheFind(vtable, srcType, dstType, delta))
     {
         delta = ComputeCast(src, static_cast<const ItaniumTypeInfo*>(srcType), static_cast<const ItaniumTypeInfo*>(dstType));
-        if (delta != kCastFails || InLoadedModule(vtable))
+        if (delta != kCastFails || IsRttiAddress(vtable))
             CastCacheStore(vtable, srcType, dstType, delta);
     }
 
