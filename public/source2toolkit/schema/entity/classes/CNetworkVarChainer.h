@@ -34,22 +34,34 @@
  * Project: Source2Toolkit
  */
 
-#ifndef _INCLUDE_EUNLOCKSTYLE_H
-#define _INCLUDE_EUNLOCKSTYLE_H
+#ifndef _INCLUDE_CNETWORKVARCHAINER_H
+#define _INCLUDE_CNETWORKVARCHAINER_H
 #ifdef _WIN32
 #pragma once
 #endif
 
+#include "source2toolkit/IToolkitPlugin.h"
+#include "source2toolkit/schema/entityio.h"
+#include "source2toolkit/schema/schema.h"
+
+#include <ehandle.h>
+#include <entityhandle.h>
+#include <igameevents.h>
+#include <utlbinaryblock.h>
+#include <utlstring.h>
+#include <utlstringtoken.h>
+#include <utlsymbol.h>
+#include <utlsymbollarge.h>
+#include <vector.h>
+
 #include <cstdint>
 
-enum class EUnlockStyle : uint32_t
+class CNetworkVarChainer
 {
-    k_UnlockStyle_Succeeded = 0,
-    k_UnlockStyle_Failed_PreReq = 1,
-    k_UnlockStyle_Failed_CantAfford = 2,
-    k_UnlockStyle_Failed_CantCommit = 3,
-    k_UnlockStyle_Failed_CantLockCache = 4,
-    k_UnlockStyle_Failed_CantAffordAttrib = 5,
+public:
+    DECLARE_SCHEMA_CLASS_INLINE(CNetworkVarChainer);
+
+    SCHEMA_FIELD(ChangeAccessorFieldPathIndex_t, m_PathIndex);
 };
 
-#endif // _INCLUDE_EUNLOCKSTYLE_H
+#endif // _INCLUDE_CNETWORKVARCHAINER_H

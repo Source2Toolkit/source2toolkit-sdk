@@ -91,9 +91,6 @@ public:
     /// <summary>Drops every click callback registered for this layout.</summary>
     void UnhookClicks();
 
-private:
-    void StateChanged(CCSPlayerController* pController);
-
 public:
     static CCSCustomHudLayout* New(const char* className)
     {

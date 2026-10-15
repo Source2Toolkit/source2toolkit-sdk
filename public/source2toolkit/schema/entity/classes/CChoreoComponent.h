@@ -40,6 +40,7 @@
 #pragma once
 #endif
 
+#include "CNetworkVarChainer.h"
 #include "SceneEventId_t.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"

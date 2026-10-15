@@ -41,6 +41,7 @@
 #endif
 
 #include "CAnimGraphControllerPtr.h"
+#include "CNetworkVarChainer.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"

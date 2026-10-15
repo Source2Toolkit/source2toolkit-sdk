@@ -40,6 +40,7 @@
 #pragma once
 #endif
 
+#include "CNetworkVarChainer.h"
 #include "source2toolkit/IToolkitPlugin.h"
 #include "source2toolkit/schema/entityio.h"
 #include "source2toolkit/schema/schema.h"
@@ -55,7 +56,6 @@
 #include <vector.h>
 
 #include <cstdint>
-
 
 class CGameSceneNode;
 
