@@ -100,9 +100,8 @@ CSchemaSystem* GetSchemaSystem();
 Schema core types
 ========================= */
 
-class GameSessionConfiguration_t
-{
-};
+// engine2/gamesessionconfiguration.h has the message itself
+class GameSessionConfiguration_t;
 
 
 typedef void (*CEntityNameString)(void);

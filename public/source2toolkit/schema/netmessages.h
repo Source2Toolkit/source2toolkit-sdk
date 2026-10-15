@@ -34,8 +34,8 @@
  * Project: Source2Toolkit
  */
 
-#ifndef NETMESSAGES_H
-#define NETMESSAGES_H
+#ifndef SCHEMA_NETMESSAGES_H
+#define SCHEMA_NETMESSAGES_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -238,4 +238,4 @@ class CSVCMsg_UserCommands_t :                  public CNetMessagePBTyped< svc_U
 class CSVCMsg_NextMsgPredicted_t :              public CNetMessagePBTyped< svc_NextMsgPredicted, CSVCMsg_NextMsgPredicted, SG_HLTVREPLAY > {};
 class CSVCMsg_EncryptedData_t :                 public CNetMessagePBTyped< svc_EncryptedData, CSVCMsg_EncryptedData > {};
 
-#endif // NETMESSAGES_H
+#endif // SCHEMA_NETMESSAGES_H
