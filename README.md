@@ -1,5 +1,10 @@
 # Source2Toolkit SDK
 
+> [!IMPORTANT]
+> **This repository is archived.** Source2Toolkit lives on as **Source2Mod**: the SDK continues as the Source2Mod SDK ([building plugins](https://source2mod.net/docs/development/building)).
+> Source2Mod grew out of Source2Toolkit -- the same core, SDK and website, renamed and carried on, with SourcePawn plugins next to C++ ones.
+> New work, releases and issues are there; website: [source2mod.net](https://source2mod.net).
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Website](https://img.shields.io/badge/Website-source2toolkit.net-blue)](https://www.source2toolkit.net)
 [![Discord](https://img.shields.io/discord/1178027657594687608?color=7289da&logo=discord&logoColor=white)](https://source2toolkit.dev/discord)
